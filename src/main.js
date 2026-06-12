@@ -5,6 +5,7 @@ import { buildSpace } from './space.js';
 import { Player } from './player.js';
 import { setupInteractions } from './interact.js';
 import { setupPost } from './post.js';
+import { audioDebug } from './audio.js';
 
 const app = document.getElementById('app');
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
@@ -69,6 +70,7 @@ window.__shot = {
   rest(m) { interactions.setMix(m); },
   fps() { return lastFps; },
   frames() { return totalFrames; },
+  audio() { return audioDebug(); },
   probe() { return ship.probe(); },
   // collision smoke test: march the player capsule and return where it stopped
   walk(x, z, dx, dz, steps) {

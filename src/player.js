@@ -1,5 +1,6 @@
 // First-person controller: pointer lock, WASD, head bob, capsule-vs-AABB collision.
 import * as THREE from 'three';
+import { playFootstep } from './audio.js';
 
 const EYE_HEIGHT = 1.7;
 const RADIUS = 0.32;
@@ -15,6 +16,7 @@ export class Player {
     this.keys = {};
     this.bobPhase = 0;
     this.bobAmount = 0;
+    this.lastStepIdx = 0;
     this.locked = false;
     this.frozen = false; // during interactions/fades
     this.debugCam = false; // screenshot rig takes over
@@ -89,7 +91,15 @@ export class Player {
     }
     // head bob: ease in/out with movement
     this.bobAmount += ((moving ? 1 : 0) - this.bobAmount) * Math.min(1, dt * 8);
-    if (moving) this.bobPhase += dt * 9;
+    if (moving) {
+      this.bobPhase += dt * 9;
+      // footfall at each head-bob low point (sin(phase*2) minimum)
+      const stepIdx = Math.floor((this.bobPhase * 2 + Math.PI / 2) / (Math.PI * 2));
+      if (stepIdx !== this.lastStepIdx) {
+        this.lastStepIdx = stepIdx;
+        playFootstep(0.8 + Math.random() * 0.4);
+      }
+    }
     this.applyCamera();
   }
 

@@ -105,3 +105,10 @@
   (z-index 10) swallowed every click — boarding never started.
 - Fix: #start also requests pointer lock. Verified headless: click → pointerLockElement set,
   overlay hidden.
+
+## Feature — footstep audio
+- src/audio.js: procedural Web Audio footsteps (no assets) — low sine thump (72→38 Hz) +
+  bandpassed noise tap, ±randomized pitch/level per step.
+- Footfalls fire at each head-bob low point (sin minimum), so audio and camera motion stay in sync.
+- AudioContext lazily created; resumes off the boarding click (sticky user activation).
+- Verified headless: lock → hold W for ~2.5 s → 7 steps fired, context "running".
