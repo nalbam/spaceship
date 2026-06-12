@@ -5,6 +5,7 @@ import { buildSpace } from './space.js';
 import { Player } from './player.js';
 import { setupInteractions } from './interact.js';
 import { setupPost } from './post.js';
+import { setupWeapon } from './weapon.js';
 import { audioDebug } from './audio.js';
 
 const app = document.getElementById('app');
@@ -36,6 +37,7 @@ const interactions = setupInteractions({
   player,
   setRestMix: ship.setRestMix,
 });
+const weapon = setupWeapon({ scene, camera, player, targetGroup: ship.group });
 const post = setupPost(renderer, scene, camera);
 
 window.addEventListener('resize', () => {
@@ -55,6 +57,7 @@ function tick() {
   ship.update(dt, elapsed);
   space.update(dt, elapsed);
   interactions.update(dt);
+  weapon.update(dt);
   post.render(dt);
   frames++; totalFrames++; fpsAcc += dt;
   if (fpsAcc >= 1) { lastFps = frames / fpsAcc; frames = 0; fpsAcc = 0; }
@@ -71,6 +74,9 @@ window.__shot = {
   fps() { return lastFps; },
   frames() { return totalFrames; },
   audio() { return audioDebug(); },
+  weapon() { return weapon.debug(); },
+  fire() { weapon.fire(); },
+  aim(v) { weapon.setAiming(v); },
   pos() { return { x: player.position.x, y: player.position.y, z: player.position.z, grounded: player.grounded }; },
   probe() { return ship.probe(); },
   // collision smoke test: march the player capsule and return where it stopped

@@ -34,6 +34,14 @@
       background: rgba(8, 12, 16, 0.45); border: 1px solid rgba(70, 200, 185, 0.25);
       padding: 4px 16px; border-radius: 3px; white-space: nowrap;
     }
+    #ammo {
+      position: absolute; right: 28px; bottom: 26px;
+      color: #ffb066; font-size: 14px; letter-spacing: 3px;
+      text-shadow: 0 0 8px rgba(0,0,0,0.9);
+      background: rgba(8, 12, 16, 0.45); border: 1px solid rgba(255, 170, 80, 0.25);
+      padding: 4px 14px; border-radius: 3px; white-space: nowrap;
+    }
+    #ammo.empty { color: #ff5230; border-color: rgba(255, 82, 48, 0.45); }
     #message {
       position: fixed; z-index: 20; left: 50%; top: 40%; transform: translateX(-50%);
       color: #f4ead8; font-size: 22px; letter-spacing: 3px;
@@ -61,12 +69,14 @@
     <div id="crosshair"></div>
     <div id="prompt"></div>
     <div id="status">SHIP TIME 08:00 &middot; ENERGY 100%</div>
+    <div id="ammo">CHARGE 12 / 12</div>
   </div>
   <div id="fade"></div>
   <div id="message"></div>
   <div id="start">
     <h1>VENTURE-CLASS LIGHT FREIGHTER</h1>
-    <p>CLICK TO BOARD &mdash; WASD MOVE &middot; MOUSE LOOK &middot; E INTERACT</p>
+    <p>CLICK TO BOARD &mdash; WASD MOVE &middot; MOUSE LOOK &middot; SPACE JUMP &middot; E INTERACT</p>
+    <p>RMB AIM &middot; LMB FIRE &middot; R RELOAD</p>
   </div>
   <script type="module" src="/src/main.js"></script>
 </body>

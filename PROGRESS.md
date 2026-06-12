@@ -128,3 +128,16 @@
   vite build → actions/deploy-pages (Pages auto-enabled via configure-pages).
 - Production build verified headless under /spaceship/: boots to __ready. Empty data-URI favicon
   added to silence the 404.
+
+## Feature — blaster
+- src/weapon.js: procedural viewmodel pistol (camera child), LMB hit-scan fire with recoil
+  (muzzle climb + gun kickback) and muzzle flash (light + additive sprite).
+- RMB aim: FOV 72 → 52 with gun centering; smooth lerp both ways.
+- Scorch decals (canvas texture, surface-normal aligned, polygon offset) + brief ember glow;
+  fade out and dispose after 10 s of game time.
+- Ammo: 12-round charge HUD bottom-right, R reload (1.2 s, mech-click sounds), empty click.
+- audio.js: playShot (detuned square sweeps + noise crack), playHit (bandpass sizzle + thump),
+  playReload, playEmpty.
+- Fix: fire() updates camera.matrixWorld before the raycast (teleport-then-fire missed).
+- Verified headless: LMB → ammo 11/12 + HUD; RMB → fov 52; R → "RELOADING…" → 12/12;
+  decal spawns on wall and expires at 10 s page time; transparent glass is shoot-through.
