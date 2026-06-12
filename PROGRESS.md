@@ -43,3 +43,14 @@
 - ❌ Galley shot framed into a wall; reframe.
 - ❌ Ceiling fixtures blow to white discs.
 - ❌ Planet bands pale, washed.
+
+## Iteration 4 — cockpit seats + planet punch + shoot rig hardening
+- Seat headrest was a huge cream box from behind (fabricWarm + warm light) → tall dark shell-back chairs.
+- Planet canvas: +contrast/+saturation pass — bands now read through the viewport.
+- Galley reframed; cockpit side-wall greebles (conduits, tanks, vents).
+- shoot.mjs: vite killed via process group (orphaned port caused intermittent "vite timeout").
+
+### Judge notes
+- ✅ Cockpit now reads: planet through panes, glowing consoles, proper pilot chairs.
+- ❌ Star drift too slow to read "flying" within 5 s at a window.
+- ❌ Cockpit side walls still plain; ceiling fixtures hot.

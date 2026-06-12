@@ -9,13 +9,21 @@ mkdirSync('shots', { recursive: true });
 
 const vite = spawn('npx', ['vite', '--port', String(PORT), '--strictPort'], {
   stdio: ['ignore', 'pipe', 'pipe'],
+  detached: true, // own process group so we can kill the whole tree
 });
+function killVite() {
+  try { process.kill(-vite.pid, 'SIGTERM'); } catch { /* already gone */ }
+}
+process.on('exit', killVite);
 await new Promise((res, rej) => {
   const t = setTimeout(() => rej(new Error('vite timeout')), 20000);
   vite.stdout.on('data', (d) => {
     if (d.toString().includes('Local:')) { clearTimeout(t); res(); }
   });
-  vite.stderr.on('data', (d) => process.stderr.write(d));
+  vite.stderr.on('data', (d) => {
+    process.stderr.write(d);
+    if (d.toString().includes('already in use')) { clearTimeout(t); rej(new Error('port busy')); }
+  });
 });
 
 const browser = await puppeteer.launch({
@@ -49,9 +57,10 @@ const SHOTS = [
   ['03_cockpit_window', 0, 1.7, -9.6, 0, 0.06, 70],
   ['04_porthole', -0.4, 1.62, -3.0, Math.PI / 2, 0, 56],
   ['05_quarters', 2.0, 1.7, -0.4, -0.76, -0.1, 18],
-  ['06_galley', -1.7, 1.7, 4.0, Math.PI / 2 + 0.45, -0.12, 18],
+  ['06_galley', -2.0, 1.7, 3.9, 1.02, -0.1, 18],
   ['07_bathroom', 1.7, 1.7, 3.9, -2.0, -0.18, 18],
   ['08_corridor_aft', 0, 1.7, -5.5, Math.PI, 0.0, 18],
+  ['10_seats', 1.4, 1.5, -10.7, 2.45, -0.35, 18],
 ];
 
 for (const [name, x, y, z, yaw, pitch, st] of SHOTS) {
@@ -83,5 +92,5 @@ const stats = await page.evaluate(() => ({ fps: window.__shot.fps(), info: windo
 console.log('STATS', JSON.stringify(stats));
 
 await browser.close();
-vite.kill();
+killVite();
 process.exit(0);

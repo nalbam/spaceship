@@ -445,6 +445,36 @@ export function buildShip(scene) {
     ship.add(dashboard);
   }
 
+  // cockpit side-wall dressing: conduit boxes, vents, small tanks
+  {
+    const geosDark = [], geosMetal = [], geosAccent = [];
+    for (const s of [-1, 1]) {
+      const wx = s * (2.6 - 0.06);
+      for (let i = 0; i < 3; i++) {
+        const z = -7.7 - i * 0.9;
+        const g = new THREE.BoxGeometry(0.1, 0.3 + (i % 2) * 0.25, 0.4);
+        g.translate(wx, 1.1 + (i % 2) * 0.5, z);
+        (i === 1 ? geosAccent : geosDark).push(g);
+      }
+      for (let k = 0; k < 4; k++) {
+        const v = new THREE.BoxGeometry(0.06, 0.035, 0.5);
+        v.translate(wx, 1.95 + k * 0.07, -8.2);
+        geosDark.push(v);
+      }
+      const tank = new THREE.CylinderGeometry(0.12, 0.12, 0.7, 12);
+      tank.translate(wx - s * 0.08, 0.55, -7.5);
+      geosMetal.push(tank);
+      // overhead conduit into the dash
+      const cond = new THREE.CylinderGeometry(0.04, 0.04, 3.2, 8);
+      cond.rotateX(Math.PI / 2);
+      cond.translate(s * 1.8, CEIL_H - 0.22, -9.2);
+      geosMetal.push(cond);
+    }
+    ship.add(new THREE.Mesh(mergeGeometries(geosDark), M.darkMetal));
+    ship.add(new THREE.Mesh(mergeGeometries(geosMetal), M.metal));
+    ship.add(new THREE.Mesh(mergeGeometries(geosAccent), M.accent));
+  }
+
   // pilot seats
   for (const s of [-1, 1]) {
     const seat = new THREE.Group();
@@ -452,10 +482,13 @@ export function buildShip(scene) {
     base.position.y = 0.2; seat.add(base);
     const cushion = box(0.56, 0.14, 0.52, M.fabric, 2);
     cushion.position.y = 0.47; seat.add(cushion);
-    const back = box(0.56, 0.75, 0.14, M.fabric, 2);
-    back.position.set(0, 0.85, 0.3); back.rotation.x = 0.12; seat.add(back);
-    const head = box(0.34, 0.22, 0.12, M.fabricWarm, 2);
-    head.position.set(0, 1.32, 0.36); seat.add(head);
+    const back = box(0.56, 1.0, 0.14, M.fabric, 2);
+    back.position.set(0, 0.98, 0.3); back.rotation.x = 0.12; seat.add(back);
+    const head = box(0.4, 0.18, 0.06, M.rubber, 2);
+    head.position.set(0, 1.34, 0.28); seat.add(head);
+    // back shell frame
+    const shell = box(0.6, 1.04, 0.05, M.darkMetal, 1);
+    shell.position.set(0, 0.98, 0.39); shell.rotation.x = 0.12; seat.add(shell);
     for (const as of [-1, 1]) {
       const arm = box(0.08, 0.08, 0.42, M.rubber, 1);
       arm.position.set(as * 0.33, 0.62, 0.08); seat.add(arm);

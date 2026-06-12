@@ -75,6 +75,14 @@ function planetCanvas(seed) {
       out.data[di + 2] = img.data[si + 2]; out.data[di + 3] = 255;
     }
   }
+  // contrast + saturation punch so bands read from far away
+  for (let i = 0; i < out.data.length; i += 4) {
+    const rr = out.data[i], gg = out.data[i + 1], bb = out.data[i + 2];
+    const lum = rr * 0.3 + gg * 0.59 + bb * 0.11;
+    out.data[i] = Math.max(0, Math.min(255, (lum + (rr - lum) * 1.5 - 128) * 1.22 + 128));
+    out.data[i + 1] = Math.max(0, Math.min(255, (lum + (gg - lum) * 1.5 - 128) * 1.22 + 128));
+    out.data[i + 2] = Math.max(0, Math.min(255, (lum + (bb - lum) * 1.5 - 128) * 1.22 + 128));
+  }
   ctx.putImageData(out, 0, 0);
   // storm spots
   for (let i = 0; i < 7; i++) {
