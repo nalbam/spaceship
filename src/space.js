@@ -135,11 +135,17 @@ export function buildSpace(scene) {
 
   // --- parallax star shells
   const layers = [
-    starLayer(1, 2200, 900, 2.0, 0.0030),
-    starLayer(2, 1400, 1400, 2.8, 0.0046),
-    starLayer(3, 500, 2000, 3.8, 0.0066),
+    starLayer(1, 2200, 900, 2.0, 0.011),
+    starLayer(2, 1400, 1400, 2.8, 0.017),
+    starLayer(3, 500, 2000, 3.8, 0.024),
   ];
   for (const l of layers) space.add(l);
+
+  // near dust layer: fast drift right past the windows sells the velocity
+  const dust = starLayer(4, 260, 140, 2.2, 0.10);
+  dust.material.opacity = 0.5;
+  space.add(dust);
+  layers.push(dust);
 
   // --- planet: textured sphere + atmosphere rim shell
   const planetGroup = new THREE.Group();

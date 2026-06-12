@@ -54,3 +54,13 @@
 - ✅ Cockpit now reads: planet through panes, glowing consoles, proper pilot chairs.
 - ❌ Star drift too slow to read "flying" within 5 s at a window.
 - ❌ Cockpit side walls still plain; ceiling fixtures hot.
+
+## Iteration 5 — motion cues + interaction verification
+- Star layer drift ×3.5 + near "dust" shell (0.1 rad/s) so windows read "flying" within seconds.
+- Cockpit side-wall trim bands + overhead housing with warm strip.
+- Sleep flow verified headless: prompt "E: Sleep" → fade to black → "8 HOURS PASS" on black →
+  wake into rest lighting → ramp back to day. Status clock +8h, energy 100%.
+- Fixed: #message was painted under #fade (fixed-position stacking context) — moved out of #hud.
+- Sleep black hold lengthened (~3.5 s) — also feels better as a time skip.
+- shoot.mjs interaction shots are state-driven (CSS opacity polling), not sleep-based — software GL
+  screenshots are slow and were racing the page timeline.

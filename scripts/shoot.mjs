@@ -74,6 +74,40 @@ for (const [name, x, y, z, yaw, pitch, st] of SHOTS) {
   console.log('shot', name);
 }
 
+// interaction flow: aim at bed → prompt → E → fade → message → wake lighting
+await page.evaluate(() => window.__shot.set(3.0, 1.7, -1.4, -0.67, -0.5));
+await new Promise((r) => setTimeout(r, 500));
+await page.screenshot({ path: 'shots/11_prompt.png' });
+console.log('shot 11_prompt');
+const promptVisible = await page.evaluate(() => {
+  const el = document.getElementById('prompt');
+  return el.style.display !== 'none' ? el.textContent : null;
+});
+console.log('PROMPT', JSON.stringify(promptVisible));
+await page.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyE' })));
+// wait for: full black + message visible (state-driven; screenshots are slow in software GL)
+await page.waitForFunction(() => {
+  const m = getComputedStyle(document.getElementById('message'));
+  const f = getComputedStyle(document.getElementById('fade'));
+  return parseFloat(m.opacity) > 0.6 && parseFloat(f.opacity) > 0.95;
+}, { timeout: 10000, polling: 50 });
+await page.screenshot({ path: 'shots/12_sleep_msg.png' });
+console.log('shot 12_sleep_msg');
+// wait for fade-out done, shoot the rest-lit room immediately
+console.log('FADE NOW', await page.evaluate(() => getComputedStyle(document.getElementById('fade')).opacity));
+await page.waitForFunction(
+  () => parseFloat(getComputedStyle(document.getElementById('fade')).opacity) < 0.05,
+  { timeout: 30000, polling: 100 },
+);
+await page.evaluate(() => window.__shot.set(2.0, 1.7, -0.4, -0.76, -0.1));
+await page.screenshot({ path: 'shots/13_wake_rest.png' });
+console.log('shot 13_wake_rest');
+console.log('WAKE PROBE', JSON.stringify(await page.evaluate(() => window.__shot.probe())));
+const status = await page.evaluate(() => document.getElementById('status').textContent);
+console.log('STATUS', JSON.stringify(status));
+// let the rest→day ramp settle back before the dedicated rest shot
+await new Promise((r) => setTimeout(r, 4500));
+
 // rest-cycle lighting shot
 const probes = await page.evaluate(() => {
   const before = window.__shot.probe();

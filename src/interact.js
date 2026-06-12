@@ -69,12 +69,13 @@ export function setupInteractions({ camera, interactables, player, setRestMix })
     state.hour = (state.hour + 8) % 24;
     state.energy = 100;
     updateStatus();
-    await new Promise((r) => setTimeout(r, 600));
-    showMessage('8 HOURS PASS', 2200);
+    await new Promise((r) => setTimeout(r, 400));
+    showMessage('8 HOURS PASS', 4600);
+    await new Promise((r) => setTimeout(r, 3400));
     await fadeTo(0, 1200);
     player.frozen = false; busy = false;
     // wake into rest lighting, then ramp the day cycle back up
-    setTimeout(() => { mixTarget = 0; }, 2500);
+    setTimeout(() => { mixTarget = 0; }, 3500);
   }
 
   async function doEat() {

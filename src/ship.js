@@ -445,6 +445,24 @@ export function buildShip(scene) {
     ship.add(dashboard);
   }
 
+  // cockpit side-wall trim bands + overhead housing
+  for (const s of [-1, 1]) {
+    const trim = box(0.05, 0.5, 3.8, M.hullDark, 0.5);
+    trim.position.set(s * 2.56, 1.35, -9.0);
+    ship.add(trim);
+    const rail = box(0.06, 0.05, 3.8, M.accent, 1);
+    rail.position.set(s * 2.55, 1.62, -9.0);
+    ship.add(rail);
+  }
+  {
+    const housing = box(1.6, 0.3, 2.4, M.hullDark, 1);
+    housing.position.set(0, CEIL_H - 0.1, -9.6);
+    ship.add(housing);
+    const hStrip = box(1.2, 0.04, 0.08, warmStripMat);
+    hStrip.position.set(0, CEIL_H - 0.27, -9.6);
+    ship.add(hStrip);
+  }
+
   // cockpit side-wall dressing: conduit boxes, vents, small tanks
   {
     const geosDark = [], geosMetal = [], geosAccent = [];
