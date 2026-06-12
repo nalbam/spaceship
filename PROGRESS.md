@@ -64,3 +64,13 @@
 - Sleep black hold lengthened (~3.5 s) — also feels better as a time skip.
 - shoot.mjs interaction shots are state-driven (CSS opacity polling), not sleep-based — software GL
   screenshots are slow and were racing the page timeline.
+
+## Iteration 6 — fixture glow, rest-mix ownership, docs
+- Ceiling fixture emissive 1.7 → 1.45 (no more blown discs).
+- `__shot.rest()` now pins the interaction mix (easing was overwriting the forced rest state next frame).
+- Scene stats: 274 meshes / 11 lights / ~17k tris — far under budget for 60fps on a mid-range GPU.
+- README.md: run/controls/rig/architecture.
+
+### Judge notes
+- ✅ Rest cycle corridor: cooler, dimmer, teal guidance — reads as night watch.
+- ✅ All 9 framed shots pass; interaction flow (prompt → black + "8 HOURS PASS" → rest wake) verified.

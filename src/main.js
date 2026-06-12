@@ -66,9 +66,21 @@ window.__shot = {
   set(x, y, z, yaw, pitch) { player.teleport(x, y, z, yaw, pitch); },
   release() { player.releaseDebug(); },
   setTime(t) { clock.elapsedTime = t; },
-  rest(m) { ship.setRestMix(m); },
+  rest(m) { interactions.setMix(m); },
   fps() { return lastFps; },
   probe() { return ship.probe(); },
+  stats() {
+    let meshes = 0, lights = 0, tris = 0;
+    scene.traverse((o) => {
+      if (o.isMesh || o.isPoints) {
+        meshes++;
+        const g = o.geometry;
+        tris += g.index ? g.index.count / 3 : (g.attributes.position?.count ?? 0) / 3;
+      }
+      if (o.isLight) lights++;
+    });
+    return { meshes, lights, tris: Math.round(tris) };
+  },
   info() { return renderer.info.render; },
 };
 window.__ready = true;

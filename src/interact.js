@@ -153,5 +153,11 @@ export function setupInteractions({ camera, interactables, player, setRestMix })
     }
   }
 
-  return { update };
+  // external override (debug/screenshot rig): pin the mix so easing can't fight it
+  function setMix(m) {
+    mixTarget = m; mixCurrent = m;
+    setRestMix(m);
+  }
+
+  return { update, setMix };
 }

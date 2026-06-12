@@ -522,7 +522,7 @@ export function createMaterials() {
     color: '#201408', emissive: '#ffc37a', emissiveIntensity: 2.6, roughness: 0.4,
   });
   M.stripWhite = new THREE.MeshStandardMaterial({
-    color: '#1a1c1e', emissive: '#fff4e0', emissiveIntensity: 1.7, roughness: 0.4,
+    color: '#1a1c1e', emissive: '#fff4e0', emissiveIntensity: 1.45, roughness: 0.4,
   });
   M.stripRed = new THREE.MeshStandardMaterial({
     color: '#1a0505', emissive: '#ff5230', emissiveIntensity: 1.8, roughness: 0.4,

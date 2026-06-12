@@ -119,10 +119,11 @@ console.log('REST PROBE', JSON.stringify(probes));
 await new Promise((r) => setTimeout(r, 700));
 await page.screenshot({ path: 'shots/09_rest_cycle.png' });
 console.log('shot 09_rest_cycle');
+console.log('POST-09 PROBE', JSON.stringify(await page.evaluate(() => window.__shot.probe())));
 await page.evaluate(() => window.__shot.rest(0));
 
 // stats
-const stats = await page.evaluate(() => ({ fps: window.__shot.fps(), info: window.__shot.info() }));
+const stats = await page.evaluate(() => ({ fps: window.__shot.fps(), scene: window.__shot.stats() }));
 console.log('STATS', JSON.stringify(stats));
 
 await browser.close();
