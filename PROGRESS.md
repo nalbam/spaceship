@@ -112,3 +112,12 @@
 - Footfalls fire at each head-bob low point (sin minimum), so audio and camera motion stay in sync.
 - AudioContext lazily created; resumes off the boarding click (sticky user activation).
 - Verified headless: lock → hold W for ~2.5 s → 7 steps fired, context "running".
+
+## Feature — jump (Space)
+- Space jumps when grounded: JUMP_SPEED 4.0, GRAVITY 13 → ~0.6 m rise at 60 fps.
+- Vertical pass in player.update: gravity integration, ceiling bump (capsule top vs collider
+  bottoms), landing on the highest collider top under the capsule — so you can hop onto
+  crates/bed and walk off edges (fall resumes).
+- Head bob and footstep cadence pause while airborne; landing plays a heavier thump.
+- Verified headless: Space → peak 0.42 m (10 fps software integration) → lands at y=0;
+  head stays under the 2.6 m ceiling.

@@ -5,6 +5,9 @@ import { playFootstep } from './audio.js';
 const EYE_HEIGHT = 1.7;
 const RADIUS = 0.32;
 const SPEED = 2.6;
+const HEAD = 1.85; // capsule top above feet, for ceiling bumps
+const GRAVITY = 13.0;
+const JUMP_SPEED = 4.0;
 
 export class Player {
   constructor(camera, domElement, colliders) {
@@ -17,6 +20,8 @@ export class Player {
     this.bobPhase = 0;
     this.bobAmount = 0;
     this.lastStepIdx = 0;
+    this.velY = 0;
+    this.grounded = true;
     this.locked = false;
     this.frozen = false; // during interactions/fades
     this.debugCam = false; // screenshot rig takes over
@@ -69,6 +74,32 @@ export class Player {
     }
   }
 
+  // highest collider top under the capsule (never below the deck at 0)
+  groundHeight(refFeetY) {
+    let g = 0;
+    for (const b of this.colliders) {
+      if (b.max.y > refFeetY + 0.01 || b.max.y <= g) continue;
+      const cx = Math.max(b.min.x, Math.min(this.position.x, b.max.x));
+      const cz = Math.max(b.min.z, Math.min(this.position.z, b.max.z));
+      const dx = this.position.x - cx, dz = this.position.z - cz;
+      if (dx * dx + dz * dz < RADIUS * RADIUS * 0.6) g = b.max.y;
+    }
+    return g;
+  }
+
+  // lowest collider bottom above the head (room ceiling by default)
+  ceilingHeight(refFeetY) {
+    let c = Infinity;
+    for (const b of this.colliders) {
+      if (b.min.y < refFeetY + HEAD - 0.01 || b.min.y >= c) continue;
+      const cx = Math.max(b.min.x, Math.min(this.position.x, b.max.x));
+      const cz = Math.max(b.min.z, Math.min(this.position.z, b.max.z));
+      const dx = this.position.x - cx, dz = this.position.z - cz;
+      if (dx * dx + dz * dz < RADIUS * RADIUS) c = b.min.y;
+    }
+    return c;
+  }
+
   update(dt) {
     if (this.debugCam) return;
     const move = new THREE.Vector3();
@@ -89,9 +120,44 @@ export class Player {
         this.collide(this.position);
       }
     }
-    // head bob: ease in/out with movement
-    this.bobAmount += ((moving ? 1 : 0) - this.bobAmount) * Math.min(1, dt * 8);
-    if (moving) {
+    // jump + gravity
+    if (this.keys.Space && this.grounded && !this.frozen && this.locked) {
+      this.velY = JUMP_SPEED;
+      this.grounded = false;
+    }
+    if (!this.grounded) {
+      const prevY = this.position.y;
+      this.velY -= GRAVITY * dt;
+      this.position.y += this.velY * dt;
+      if (this.velY > 0) {
+        // ceiling bump
+        const ceil = this.ceilingHeight(prevY);
+        if (this.position.y + HEAD > ceil) {
+          this.position.y = ceil - HEAD;
+          this.velY = 0;
+        }
+      } else {
+        // land on the floor or whatever is under the capsule
+        const ground = this.groundHeight(prevY);
+        if (this.position.y <= ground) {
+          this.position.y = ground;
+          this.velY = 0;
+          this.grounded = true;
+          playFootstep(1.3); // landing thump
+        }
+      }
+    } else {
+      // walked off an edge (e.g. off a crate or the bed)
+      const ground = this.groundHeight(this.position.y);
+      if (this.position.y > ground + 0.001) {
+        this.grounded = false;
+        this.velY = 0;
+      }
+    }
+    // head bob: ease in/out with movement (no bob while airborne)
+    const bobbing = moving && this.grounded;
+    this.bobAmount += ((bobbing ? 1 : 0) - this.bobAmount) * Math.min(1, dt * 8);
+    if (bobbing) {
       this.bobPhase += dt * 9;
       // footfall at each head-bob low point (sin(phase*2) minimum)
       const stepIdx = Math.floor((this.bobPhase * 2 + Math.PI / 2) / (Math.PI * 2));

@@ -71,6 +71,7 @@ window.__shot = {
   fps() { return lastFps; },
   frames() { return totalFrames; },
   audio() { return audioDebug(); },
+  pos() { return { x: player.position.x, y: player.position.y, z: player.position.z, grounded: player.grounded }; },
   probe() { return ship.probe(); },
   // collision smoke test: march the player capsule and return where it stopped
   walk(x, z, dx, dz, steps) {
