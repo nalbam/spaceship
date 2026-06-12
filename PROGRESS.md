@@ -99,3 +99,9 @@
 - ✅ 3+ PBR families (painted panel, worn/brushed metal, fabric + rubber), roughness variation, PMREM env
 - ✅ Cohesive palette: off-white hull / orange accents / teal practicals
 - ✅ Procedural everything; Vite + three modules: player/ship/space/interact/post/main (+textures)
+
+## Fix — boarding click
+- Bug: pointer-lock click handler was only on the canvas, but the full-screen #start overlay
+  (z-index 10) swallowed every click — boarding never started.
+- Fix: #start also requests pointer lock. Verified headless: click → pointerLockElement set,
+  overlay hidden.

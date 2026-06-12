@@ -19,9 +19,12 @@ export class Player {
     this.frozen = false; // during interactions/fades
     this.debugCam = false; // screenshot rig takes over
 
-    domElement.addEventListener('click', () => {
+    // the #start overlay sits on top of the canvas, so it must request the lock too
+    const requestLock = () => {
       if (!this.locked) domElement.requestPointerLock();
-    });
+    };
+    domElement.addEventListener('click', requestLock);
+    document.getElementById('start').addEventListener('click', requestLock);
     document.addEventListener('pointerlockchange', () => {
       this.locked = document.pointerLockElement === domElement;
       document.getElementById('start').classList.toggle('hidden', this.locked);
