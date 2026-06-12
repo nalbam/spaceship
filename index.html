@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spaceship</title>
+  <style>
+    html, body { margin: 0; padding: 0; overflow: hidden; background: #000; height: 100%; }
+    #app { position: fixed; inset: 0; }
+    canvas { display: block; }
+    #hud {
+      position: fixed; inset: 0; pointer-events: none;
+      font-family: 'Lucida Console', Monaco, monospace;
+      user-select: none;
+    }
+    #crosshair {
+      position: absolute; left: 50%; top: 50%; width: 6px; height: 6px;
+      margin: -3px 0 0 -3px; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.55);
+      box-shadow: 0 0 4px rgba(0,0,0,0.8);
+    }
+    #prompt {
+      position: absolute; left: 50%; top: 56%; transform: translateX(-50%);
+      color: #ffe8c8; font-size: 15px; letter-spacing: 1px;
+      text-shadow: 0 0 6px rgba(0,0,0,0.9), 0 1px 2px #000;
+      background: rgba(10, 14, 18, 0.55); border: 1px solid rgba(255, 170, 80, 0.35);
+      padding: 5px 14px; border-radius: 3px; display: none;
+    }
+    #status {
+      position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%);
+      color: #8de8dc; font-size: 13px; letter-spacing: 2px;
+      text-shadow: 0 0 8px rgba(0,0,0,0.9);
+      background: rgba(8, 12, 16, 0.45); border: 1px solid rgba(70, 200, 185, 0.25);
+      padding: 4px 16px; border-radius: 3px; white-space: nowrap;
+    }
+    #message {
+      position: absolute; left: 50%; top: 40%; transform: translateX(-50%);
+      color: #f4ead8; font-size: 22px; letter-spacing: 3px;
+      text-shadow: 0 0 12px rgba(0,0,0,1);
+      opacity: 0; transition: opacity 0.6s ease; white-space: nowrap;
+    }
+    #fade {
+      position: fixed; inset: 0; background: #000; opacity: 0;
+      transition: opacity 0.7s ease; pointer-events: none;
+    }
+    #start {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 14px; background: rgba(4, 6, 9, 0.82);
+      color: #d8d4cc; cursor: pointer; z-index: 10;
+      font-family: 'Lucida Console', Monaco, monospace;
+    }
+    #start h1 { font-size: 26px; letter-spacing: 6px; margin: 0; color: #ffb066; font-weight: normal; }
+    #start p { font-size: 13px; letter-spacing: 2px; color: #7fc9c0; margin: 0; }
+    #start.hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="hud">
+    <div id="crosshair"></div>
+    <div id="prompt"></div>
+    <div id="message"></div>
+    <div id="status">SHIP TIME 08:00 &middot; ENERGY 100%</div>
+  </div>
+  <div id="fade"></div>
+  <div id="start">
+    <h1>VENTURE-CLASS LIGHT FREIGHTER</h1>
+    <p>CLICK TO BOARD &mdash; WASD MOVE &middot; MOUSE LOOK &middot; E INTERACT</p>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

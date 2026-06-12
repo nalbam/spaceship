@@ -1,0 +1,115 @@
+// First-person controller: pointer lock, WASD, head bob, capsule-vs-AABB collision.
+import * as THREE from 'three';
+
+const EYE_HEIGHT = 1.7;
+const RADIUS = 0.32;
+const SPEED = 2.6;
+
+export class Player {
+  constructor(camera, domElement, colliders) {
+    this.camera = camera;
+    this.colliders = colliders;
+    this.position = new THREE.Vector3(0, 0, 4.5); // feet
+    this.yaw = 0; // facing -z (cockpit)
+    this.pitch = 0;
+    this.keys = {};
+    this.bobPhase = 0;
+    this.bobAmount = 0;
+    this.locked = false;
+    this.frozen = false; // during interactions/fades
+    this.debugCam = false; // screenshot rig takes over
+
+    domElement.addEventListener('click', () => {
+      if (!this.locked) domElement.requestPointerLock();
+    });
+    document.addEventListener('pointerlockchange', () => {
+      this.locked = document.pointerLockElement === domElement;
+      document.getElementById('start').classList.toggle('hidden', this.locked);
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!this.locked || this.frozen) return;
+      this.yaw -= e.movementX * 0.0023;
+      this.pitch -= e.movementY * 0.0023;
+      this.pitch = Math.max(-1.45, Math.min(1.45, this.pitch));
+    });
+    document.addEventListener('keydown', (e) => { this.keys[e.code] = true; });
+    document.addEventListener('keyup', (e) => { this.keys[e.code] = false; });
+
+    this.applyCamera();
+  }
+
+  // resolve horizontal circle-vs-AABB for every collider
+  collide(pos) {
+    const feetY = pos.y, headY = pos.y + EYE_HEIGHT + 0.1;
+    for (const b of this.colliders) {
+      if (b.max.y < feetY + 0.25 || b.min.y > headY) continue; // step over low / under high
+      const cx = Math.max(b.min.x, Math.min(pos.x, b.max.x));
+      const cz = Math.max(b.min.z, Math.min(pos.z, b.max.z));
+      const dx = pos.x - cx, dz = pos.z - cz;
+      const d2 = dx * dx + dz * dz;
+      if (d2 < RADIUS * RADIUS) {
+        if (d2 > 1e-9) {
+          const d = Math.sqrt(d2);
+          const push = (RADIUS - d) / d;
+          pos.x += dx * push;
+          pos.z += dz * push;
+        } else {
+          // center inside the box: push out along the smallest penetration axis
+          const px = Math.min(pos.x - b.min.x + RADIUS, b.max.x - pos.x + RADIUS);
+          const pz = Math.min(pos.z - b.min.z + RADIUS, b.max.z - pos.z + RADIUS);
+          if (px < pz) pos.x += (pos.x - b.min.x < b.max.x - pos.x) ? -px : px;
+          else pos.z += (pos.z - b.min.z < b.max.z - pos.z) ? -pz : pz;
+        }
+      }
+    }
+  }
+
+  update(dt) {
+    if (this.debugCam) return;
+    const move = new THREE.Vector3();
+    if (!this.frozen && this.locked) {
+      if (this.keys.KeyW) move.z -= 1;
+      if (this.keys.KeyS) move.z += 1;
+      if (this.keys.KeyA) move.x -= 1;
+      if (this.keys.KeyD) move.x += 1;
+    }
+    const moving = move.lengthSq() > 0;
+    if (moving) {
+      move.normalize().applyAxisAngle(new THREE.Vector3(0, 1, 0), this.yaw);
+      const step = move.multiplyScalar(SPEED * dt);
+      // sub-step so fast frames don't tunnel
+      const n = Math.ceil(step.length() / (RADIUS * 0.5));
+      for (let i = 0; i < n; i++) {
+        this.position.addScaledVector(step, 1 / n);
+        this.collide(this.position);
+      }
+    }
+    // head bob: ease in/out with movement
+    this.bobAmount += ((moving ? 1 : 0) - this.bobAmount) * Math.min(1, dt * 8);
+    if (moving) this.bobPhase += dt * 9;
+    this.applyCamera();
+  }
+
+  applyCamera() {
+    const bobY = Math.sin(this.bobPhase * 2) * 0.025 * this.bobAmount;
+    const bobX = Math.sin(this.bobPhase) * 0.012 * this.bobAmount;
+    this.camera.position.set(
+      this.position.x + Math.cos(this.yaw) * bobX,
+      this.position.y + EYE_HEIGHT + bobY,
+      this.position.z - Math.sin(this.yaw) * bobX,
+    );
+    this.camera.rotation.set(0, 0, 0);
+    this.camera.rotateY(this.yaw);
+    this.camera.rotateX(this.pitch);
+  }
+
+  // screenshot/debug rig
+  teleport(x, y, z, yaw, pitch) {
+    this.debugCam = true;
+    this.camera.position.set(x, y, z);
+    this.camera.rotation.set(0, 0, 0);
+    this.camera.rotateY(yaw);
+    this.camera.rotateX(pitch);
+  }
+  releaseDebug() { this.debugCam = false; }
+}
