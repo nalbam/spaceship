@@ -22,7 +22,7 @@ const camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerH
 {
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 0.25;
+  scene.environmentIntensity = 0.07;
   pmrem.dispose();
 }
 

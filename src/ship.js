@@ -95,6 +95,13 @@ export function buildShip(scene) {
   function wallRun(side, z0, z1, mat) {
     const len = z1 - z0;
     slab(side * (CW + WALL_T / 2), CEIL_H / 2, (z0 + z1) / 2, WALL_T, CEIL_H, len, mat);
+    // two-tone: darker kick band along the lower wall
+    const band = box(0.04, 0.85, len, M.hullDark, 0.5);
+    band.position.set(side * (CW - 0.005), 0.425, (z0 + z1) / 2);
+    ship.add(band);
+    const trim = box(0.05, 0.06, len, M.accent, 1);
+    trim.position.set(side * (CW - 0.01), 0.88, (z0 + z1) / 2);
+    ship.add(trim);
   }
   wallRun(1, -7, -2.1, M.hull);
   wallRun(1, -0.9, 3.9, M.hull);
@@ -104,13 +111,13 @@ export function buildShip(scene) {
   slab(CW + WALL_T / 2, 2.3, 4.5, WALL_T, 0.6, 1.2, M.hull);
 
   // -x wall with two portholes at z=-4.6 and z=-1.8, galley door z=2.2..3.4
-  wallRun(-1, -7, -5.25, M.hull);
-  wallRun(-1, -3.95, -2.45, M.hull);
-  wallRun(-1, -1.15, 2.2, M.hull);
+  wallRun(-1, -7, -5.65, M.hull);
+  wallRun(-1, -4.35, -3.65, M.hull);
+  wallRun(-1, -2.35, 2.2, M.hull);
   wallRun(-1, 3.4, 7, M.hull);
   slab(-CW - WALL_T / 2, 2.3, 2.8, WALL_T, 0.6, 1.2, M.hull);
   // porthole wall segments (above/below openings)
-  for (const pz of [-4.6, -1.8]) {
+  for (const pz of [-5, -3]) {
     slab(-CW - WALL_T / 2, 0.55, pz, WALL_T, 1.1, 1.3, M.hull); // below
     slab(-CW - WALL_T / 2, 2.42, pz, WALL_T, 0.36, 1.3, M.hull); // above
     buildPorthole(-CW - WALL_T / 2, 1.62, pz);
@@ -194,14 +201,14 @@ export function buildShip(scene) {
     const pl = new THREE.PointLight('#ffd9a0', 0, 7, 1.8);
     pl.position.set(0, CEIL_H - 0.35, z);
     ship.add(pl);
-    regLight(pl, 9, 0.7);
+    regLight(pl, 4.2, 0.5);
     if (z < -4) flickers.push(pl);
   }
   // cool spill from portholes
   const portLight = new THREE.PointLight('#7fb4d8', 0, 5, 1.8);
   portLight.position.set(-1.0, 1.6, -3.2);
   ship.add(portLight);
-  regLight(portLight, 2.5, 3.2);
+  regLight(portLight, 1.8, 2.6);
 
   // wall conduits & pipes along the ceiling corners (merged)
   buildPipes();
@@ -462,11 +469,11 @@ export function buildShip(scene) {
   const coolKey = new THREE.PointLight('#9fc8ff', 0, 9, 1.6);
   coolKey.position.set(0, 1.9, -11.0);
   ship.add(coolKey);
-  regLight(coolKey, 7, 5);
+  regLight(coolKey, 4.5, 3.5);
   const warmFill = new THREE.PointLight('#ffc890', 0, 6, 2);
   warmFill.position.set(0, 2.3, -7.8);
   ship.add(warmFill);
-  regLight(warmFill, 6, 0.5);
+  regLight(warmFill, 2.2, 0.3);
   // overhead switch panel w/ tiny emissive dots
   {
     const panel = box(1.2, 0.5, 0.08, M.hullDark, 1);
@@ -549,7 +556,7 @@ export function buildShip(scene) {
   const qLight = new THREE.PointLight('#ffcf9a', 0, 6, 1.8);
   qLight.position.set(3.4, CEIL_H - 0.3, -1.2);
   ship.add(qLight);
-  regLight(qLight, 7, 0.4);
+  regLight(qLight, 3.8, 0.35);
   {
     const fixture = box(0.5, 0.04, 0.5, whiteStripMat);
     fixture.position.set(3.4, CEIL_H - 0.02, -1.2);
@@ -640,7 +647,7 @@ export function buildShip(scene) {
   const gLight = new THREE.PointLight('#ffd9a0', 0, 6, 1.8);
   gLight.position.set(-3.6, CEIL_H - 0.4, 2.8);
   ship.add(gLight);
-  regLight(gLight, 8, 0.5);
+  regLight(gLight, 4.2, 0.4);
   {
     const fixture = box(0.5, 0.04, 0.9, whiteStripMat);
     fixture.position.set(-3.6, CEIL_H - 0.02, 2.8);
@@ -688,7 +695,7 @@ export function buildShip(scene) {
   const bLight = new THREE.PointLight('#dcecff', 0, 4, 1.8);
   bLight.position.set(2.5, CEIL_H - 0.3, 4.5);
   ship.add(bLight);
-  regLight(bLight, 5, 0.6);
+  regLight(bLight, 2.8, 0.5);
   {
     const fixture = box(0.4, 0.04, 0.4, whiteStripMat);
     fixture.position.set(2.5, CEIL_H - 0.02, 4.5);
@@ -698,7 +705,7 @@ export function buildShip(scene) {
   // ============================================================ global
   const hemi = new THREE.HemisphereLight('#2c3640', '#1c150e', 0);
   scene.add(hemi);
-  regLight(hemi, 0.5, 0.18);
+  regLight(hemi, 0.22, 0.1);
 
   // rest-cycle mix control
   let restMix = 0;
@@ -721,7 +728,7 @@ export function buildShip(scene) {
       // subtle dirty-ballast flicker on one corridor light
       const base = f === flickers[0] ? 1 : 1;
       const n = Math.sin(elapsed * 31.7) * Math.sin(elapsed * 17.3 + 1.7) * Math.sin(elapsed * 7.1);
-      const dayBase = 9 * (1 - restMix) + 0.7 * restMix;
+      const dayBase = 4.2 * (1 - restMix) + 0.5 * restMix;
       f.intensity = dayBase * (0.92 + 0.08 * n * base);
     }
   }

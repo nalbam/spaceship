@@ -43,14 +43,14 @@ await page.evaluate(() => {
 await new Promise((r) => setTimeout(r, 1500)); // warm up, textures, AO
 
 const SHOTS = [
-  // [name, x, y(feet→eye handled by rig: pass eye y), z, yaw, pitch, spaceTime]
+  // [name, x, y, z, yaw, pitch, spaceTime]
   ['01_corridor_fwd', 0, 1.7, 5.8, 0, 0.02, 18],
-  ['02_cockpit', 0, 1.7, -8.4, 0, -0.04, 18],
-  ['03_cockpit_window', 0, 1.7, -9.6, 0, 0.06, 22],
-  ['04_porthole', -0.5, 1.62, -1.8, Math.PI / 2, 0, 40],
-  ['05_quarters', 2.2, 1.7, -0.2, Math.PI + 0.7, -0.12, 18],
-  ['06_galley', -2.0, 1.7, 1.6, -Math.PI / 4 - 0.5, -0.1, 18],
-  ['07_bathroom', 1.9, 1.7, 4.1, -Math.PI / 2 - 0.5, -0.15, 18],
+  ['02_cockpit', 0, 1.7, -8.4, 0, -0.04, 70],
+  ['03_cockpit_window', 0, 1.7, -9.6, 0, 0.06, 70],
+  ['04_porthole', -0.4, 1.62, -3.0, Math.PI / 2, 0, 56],
+  ['05_quarters', 2.0, 1.7, -0.4, -0.76, -0.1, 18],
+  ['06_galley', -1.9, 1.7, 2.3, Math.PI / 2 - 0.35, -0.08, 18],
+  ['07_bathroom', 1.8, 1.7, 4.4, -1.64, -0.15, 18],
   ['08_corridor_aft', 0, 1.7, -5.5, Math.PI, 0.0, 18],
 ];
 

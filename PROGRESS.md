@@ -16,3 +16,16 @@
 
 ### Next
 - Exposure/lighting rebalance, stronger grime/seams, two-tone walls, bigger stars, planet timing per shot, porthole reposition.
+
+## Iteration 2 — exposure + framing
+- Exposure 0.88, env 0.07, all practicals ~halved, bloom threshold 1.0.
+- Portholes moved to z=-3/-5 (clear of ribs); two-tone kick band + accent trim on corridor walls.
+- Stars bigger; shot times aligned so the planet is actually in frame.
+
+### Judge notes
+- ✅ Corridor fwd/aft: contrast, grime, teal grate glow, stripes — reads "used future" now.
+- ✅ Cockpit viewport: planet + rim glow + stars through 3 panes, emissive consoles. Best shot so far.
+- ✅ Porthole: planet limb visible, frame/bolts read.
+- ❌ Quarters/galley/bathroom: bare white "hospital" walls, furniture sparse, hotplates invisible.
+- ❌ Panel texture reads as square bathroom tile; needs rectangular variety + dark panels.
+- ❌ Rest-cycle shot (09) looks identical to day — setRestMix may not be applying; debug.

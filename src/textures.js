@@ -108,7 +108,7 @@ function makePanelMaps(seed, baseColor, accentColor, accentChance) {
       if (isAccent) {
         a.fillStyle = accentColor;
       } else {
-        a.fillStyle = `rgba(${tintShift > 0 ? 255 : 0},${tintShift > 0 ? 250 : 10},${tintShift > 0 ? 240 : 30},${Math.abs(tintShift) / 90})`;
+        a.fillStyle = `rgba(${tintShift > 0 ? 255 : 0},${tintShift > 0 ? 250 : 10},${tintShift > 0 ? 240 : 30},${Math.abs(tintShift) / 55})`;
       }
       a.fillRect(x + 3, y + 3, pw - 6, rh - 6);
       // seams: dark albedo, deep height, rough
@@ -156,9 +156,9 @@ function makePanelMaps(seed, baseColor, accentColor, accentChance) {
       const u = px / S, v = py / S;
       const g = grime(u, v);
       const m = micro(u * 3 % 1, v * 3 % 1);
-      const dirt = Math.max(0, g - 0.42) * 0.9 + Math.max(0, m - 0.6) * 0.25;
+      const dirt = Math.max(0, g - 0.38) * 1.1 + Math.max(0, m - 0.55) * 0.35;
       const i = (py * S + px) * 4;
-      const mul = 1 - dirt * 0.5;
+      const mul = 1 - dirt * 0.62;
       ai.data[i] *= mul; ai.data[i + 1] *= mul * 0.985; ai.data[i + 2] *= mul * 0.96;
       ri.data[i] = Math.min(255, ri.data[i] + dirt * 140 + (m - 0.5) * 50);
       ri.data[i + 1] = ri.data[i]; ri.data[i + 2] = ri.data[i];

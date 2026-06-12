@@ -127,9 +127,9 @@ export function buildSpace(scene) {
 
   // --- parallax star shells
   const layers = [
-    starLayer(1, 2200, 900, 1.4, 0.0030),
-    starLayer(2, 1400, 1400, 2.0, 0.0046),
-    starLayer(3, 500, 2000, 2.8, 0.0066),
+    starLayer(1, 2200, 900, 2.0, 0.0030),
+    starLayer(2, 1400, 1400, 2.8, 0.0046),
+    starLayer(3, 500, 2000, 3.8, 0.0066),
   ];
   for (const l of layers) space.add(l);
 
