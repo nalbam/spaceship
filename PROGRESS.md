@@ -150,3 +150,12 @@
   three mech-click sounds.
 - Verified headless: bolt in flight (bolts:1) → impact (decals:1); mid-reload dip frame
   captured; reload completes to 12/12 (an apparent off-by-one was debug toFixed rounding).
+
+## Fix — reload spin
+- Root cause: per-frame rotateX/rotateZ offsets were applied on top of a slerped quaternion,
+  so at high fps (slerp factor < 1) the offsets accumulated into full spins that unwound at
+  the end of the reload. Headless 10 fps clamped the slerp factor to 1 and masked it.
+- Fix: gun.quaternion is rebuilt every frame as baseQuat (eased hip/ads) × offsetQuat
+  (dip + recoil, absolute) — structurally no accumulation at any frame rate.
+- Motion shaped as drop → hold low (mag swap) → raise, via smoothstep envelope.
+- Verified: peak rotation 0.52 rad during reload, final pose returns exactly to idle.

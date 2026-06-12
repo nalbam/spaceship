@@ -193,6 +193,13 @@ export function setupWeapon({ scene, camera, player, targetGroup }) {
   });
 
   const tmp = new THREE.Vector3();
+  const baseQuat = hipQuat.clone(); // eased base pose; offsets are applied fresh each frame
+  const offsetQuat = new THREE.Quaternion();
+  const offsetEuler = new THREE.Euler();
+  const smooth = (a, b, x) => {
+    const u = Math.min(1, Math.max(0, (x - a) / (b - a)));
+    return u * u * (3 - 2 * u);
+  };
   function update(dt) {
     // reload timer
     if (reloading > 0) {
@@ -209,15 +216,18 @@ export function setupWeapon({ scene, camera, player, targetGroup }) {
       camera.fov += (targetFov - camera.fov) * Math.min(1, dt * 12);
       camera.updateProjectionMatrix();
     }
-    // reload motion: dip + tilt that peaks mid-reload
-    const dip = reloading > 0 ? Math.sin((1 - reloading / RELOAD_TIME) * Math.PI) : 0;
+    // reload motion: drop in, hold low while the mag swaps, raise back out
+    const rt = reloading > 0 ? 1 - reloading / RELOAD_TIME : 0;
+    const dip = reloading > 0 ? smooth(0, 0.22, rt) * (1 - smooth(0.78, 1, rt)) : 0;
     tmp.copy(aiming ? ADS_POS : HIP_POS);
     tmp.z += recoil * 0.05; // kickback
-    tmp.y -= dip * 0.13;
+    tmp.y -= dip * 0.12;
+    tmp.x += dip * 0.03;
     gun.position.lerp(tmp, Math.min(1, dt * 14));
-    gun.quaternion.slerp(aiming ? adsQuat : hipQuat, Math.min(1, dt * 14));
-    gun.rotateX(recoil * 0.12 - dip * 0.75);
-    gun.rotateZ(dip * 0.35);
+    // base pose eases between hip/ads; dip + recoil are absolute offsets (no accumulation)
+    baseQuat.slerp(aiming ? adsQuat : hipQuat, Math.min(1, dt * 14));
+    offsetEuler.set(recoil * 0.12 - dip * 0.55, 0, dip * 0.5);
+    gun.quaternion.copy(baseQuat).multiply(offsetQuat.setFromEuler(offsetEuler));
     recoil = Math.max(0, recoil - dt * 7);
     // bolts in flight: advance, impact at the end of the path
     for (let i = bolts.length - 1; i >= 0; i--) {
@@ -264,7 +274,15 @@ export function setupWeapon({ scene, camera, player, targetGroup }) {
 
   return {
     update,
-    debug: () => ({ ammo, reloading: +reloading.toFixed(2), aiming, fov: +camera.fov.toFixed(1), decals: decals.length, bolts: bolts.length }),
+    debug: () => ({
+      ammo,
+      reloading: +reloading.toFixed(2),
+      aiming,
+      fov: +camera.fov.toFixed(1),
+      decals: decals.length,
+      bolts: bolts.length,
+      rot: gun.rotation.toArray().slice(0, 3).map((v) => +v.toFixed(3)),
+    }),
     fire, // exposed for the headless rig
     reload,
     setAiming(v) { aiming = v; },
