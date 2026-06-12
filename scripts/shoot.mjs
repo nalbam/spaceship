@@ -42,7 +42,7 @@ page.on('console', (m) => {
 });
 page.on('pageerror', (e) => console.log('[pageerror]', e.message));
 
-await page.goto(`http://localhost:${PORT}`, { waitUntil: 'domcontentloaded' });
+await page.goto(`http://localhost:${PORT}/spaceship/`, { waitUntil: 'domcontentloaded' });
 await page.waitForFunction('window.__ready === true', { timeout: 30000 });
 // hide start overlay + HUD crosshair noise for clean shots? keep HUD (part of look)
 await page.evaluate(() => {

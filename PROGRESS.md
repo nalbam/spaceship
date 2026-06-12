@@ -121,3 +121,10 @@
 - Head bob and footstep cadence pause while airborne; landing plays a heavier thump.
 - Verified headless: Space → peak 0.42 m (10 fps software integration) → lands at y=0;
   head stays under the 2.6 m ceiling.
+
+## Deploy — GitHub Pages
+- vite.config.js: base '/spaceship/' (project page path); shoot rig follows the base URL.
+- .github/workflows/deploy.yml: on push to main → npm ci (puppeteer download skipped) →
+  vite build → actions/deploy-pages (Pages auto-enabled via configure-pages).
+- Production build verified headless under /spaceship/: boots to __ready. Empty data-URI favicon
+  added to silence the 404.
