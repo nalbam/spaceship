@@ -68,6 +68,7 @@ window.__shot = {
   setTime(t) { clock.elapsedTime = t; },
   rest(m) { ship.setRestMix(m); },
   fps() { return lastFps; },
+  probe() { return ship.probe(); },
   info() { return renderer.info.render; },
 };
 window.__ready = true;

@@ -94,22 +94,31 @@ function makePanelMaps(seed, baseColor, accentColor, accentChance) {
   r.fillStyle = '#969696'; r.fillRect(0, 0, S, S); // base roughness ~0.59
   hc.fillStyle = '#808080'; hc.fillRect(0, 0, S, S);
 
-  // panel grid with irregular sizes
-  const rows = 4;
+  // panel grid: irregular rectangles, some accent / dark-slate panels
+  const rows = 5;
   let y = 0;
   for (let ry = 0; ry < rows; ry++) {
-    const rh = (S / rows) * (0.8 + rand() * 0.4);
+    const rh = (S / rows) * (0.6 + rand() * 0.85);
     let x = 0;
     while (x < S - 8) {
-      const pw = S * (0.12 + rand() * 0.2);
-      // slight per-panel tint
-      const isAccent = rand() < accentChance;
+      const pw = S * (0.1 + rand() * 0.32);
+      const roll = rand();
+      const isAccent = roll < accentChance;
+      const isDark = !isAccent && roll < accentChance + 0.13;
       const tintShift = Math.floor((rand() - 0.5) * 16);
       if (isAccent) {
         a.fillStyle = accentColor;
+      } else if (isDark) {
+        a.fillStyle = 'rgba(58,62,70,0.92)';
       } else {
         a.fillStyle = `rgba(${tintShift > 0 ? 255 : 0},${tintShift > 0 ? 250 : 10},${tintShift > 0 ? 240 : 30},${Math.abs(tintShift) / 55})`;
       }
+      a.fillRect(x + 3, y + 3, pw - 6, rh - 6);
+      // subtle per-panel vertical shading so big walls don't read flat
+      const shade = a.createLinearGradient(0, y, 0, y + rh);
+      shade.addColorStop(0, 'rgba(255,255,255,0.05)');
+      shade.addColorStop(1, 'rgba(0,0,0,0.13)');
+      a.fillStyle = shade;
       a.fillRect(x + 3, y + 3, pw - 6, rh - 6);
       // seams: dark albedo, deep height, rough
       a.strokeStyle = 'rgba(18,16,14,0.85)'; a.lineWidth = 3;
@@ -431,6 +440,18 @@ export function createMaterials() {
   const hull = makePanelMaps(101, '#cfcabe', '#c96b2c', 0.07);
   M.hull = new THREE.MeshStandardMaterial({
     map: tex(hull.albedo, true), roughnessMap: tex(hull.rough), normalMap: tex(hull.normal),
+    roughness: 1, metalness: 0.12, normalScale: new THREE.Vector2(0.8, 0.8),
+  });
+
+  const hullWarm = makePanelMaps(115, '#c0ac8e', '#7a4a28', 0.06);
+  M.hullWarm = new THREE.MeshStandardMaterial({
+    map: tex(hullWarm.albedo, true), roughnessMap: tex(hullWarm.rough), normalMap: tex(hullWarm.normal),
+    roughness: 1, metalness: 0.12, normalScale: new THREE.Vector2(0.8, 0.8),
+  });
+
+  const hullCool = makePanelMaps(217, '#a8b4ba', '#3f7d84', 0.07);
+  M.hullCool = new THREE.MeshStandardMaterial({
+    map: tex(hullCool.albedo, true), roughnessMap: tex(hullCool.rough), normalMap: tex(hullCool.normal),
     roughness: 1, metalness: 0.12, normalScale: new THREE.Vector2(0.8, 0.8),
   });
 

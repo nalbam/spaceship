@@ -29,3 +29,17 @@
 - ❌ Quarters/galley/bathroom: bare white "hospital" walls, furniture sparse, hotplates invisible.
 - ❌ Panel texture reads as square bathroom tile; needs rectangular variety + dark panels.
 - ❌ Rest-cycle shot (09) looks identical to day — setRestMix may not be applying; debug.
+
+## Iteration 3 — room dressing + panel variety
+- Panel texture: rectangular variety, 13% dark-slate panels, per-panel gradient shading.
+- Per-room wall tints (quarters warm, bathroom cool). Quarters: poster, pipes, vents, status screen, teal blanket.
+- Galley: cooktop unit + glowing rings, backsplash, cabinet doors/handles, canisters, mugs.
+- Bathroom: mirror frame + light strip, under-sink pipes, towel bar, vents.
+- Rest-cycle verified working via probe (warm 2.6→0.12, teal 2.4→3.0): night shot clearly reads.
+
+### Judge notes
+- ✅ Quarters reads lived-in: poster, crates, teal bed pop against warm walls.
+- ✅ Rest cycle: dim warm + bright teal guidance — clearly distinct.
+- ❌ Galley shot framed into a wall; reframe.
+- ❌ Ceiling fixtures blow to white discs.
+- ❌ Planet bands pale, washed.

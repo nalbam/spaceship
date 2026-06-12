@@ -498,9 +498,61 @@ export function buildShip(scene) {
   const Q = { x0: 1.4, x1: 5.4, z0: -3.5, z1: 0.5 };
   slab(3.4, -0.05, -1.5, 4.0, 0.1, 4.0, M.floor);
   slab(3.4, CEIL_H + 0.05, -1.5, 4.0, 0.1, 4.0, M.hullDark);
-  slab(Q.x1 + WALL_T / 2, CEIL_H / 2, -1.5, WALL_T, CEIL_H, 4.0, M.hull);
-  slab(3.4, CEIL_H / 2, Q.z0 - WALL_T / 2, 4.0, CEIL_H, WALL_T, M.hull);
-  slab(3.4, CEIL_H / 2, Q.z1 + WALL_T / 2, 4.0, CEIL_H, WALL_T, M.hull);
+  slab(Q.x1 + WALL_T / 2, CEIL_H / 2, -1.5, WALL_T, CEIL_H, 4.0, M.hullWarm);
+  slab(3.4, CEIL_H / 2, Q.z0 - WALL_T / 2, 4.0, CEIL_H, WALL_T, M.hullWarm);
+  slab(3.4, CEIL_H / 2, Q.z1 + WALL_T / 2, 4.0, CEIL_H, WALL_T, M.hullWarm);
+  // quarters dressing: ceiling pipe, wall poster, vents, status screen
+  {
+    const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 3.8, 10), M.metal);
+    pipe.rotation.z = Math.PI / 2;
+    pipe.position.set(3.4, CEIL_H - 0.18, Q.z0 + 0.25);
+    ship.add(pipe);
+    // poster: procedural schematic print
+    const pc = document.createElement('canvas');
+    pc.width = 256; pc.height = 384;
+    const pctx = pc.getContext('2d');
+    pctx.fillStyle = '#14202a'; pctx.fillRect(0, 0, 256, 384);
+    pctx.strokeStyle = '#e8722a'; pctx.lineWidth = 3;
+    pctx.strokeRect(10, 10, 236, 364);
+    pctx.beginPath(); pctx.arc(128, 140, 70, 0, 7); pctx.stroke();
+    pctx.beginPath(); pctx.arc(128, 140, 44, 0.5, 4); pctx.stroke();
+    pctx.strokeStyle = '#2ee8d8'; pctx.lineWidth = 2;
+    for (let i = 0; i < 5; i++) {
+      pctx.beginPath(); pctx.moveTo(30, 250 + i * 22); pctx.lineTo(120 + (i % 3) * 40, 250 + i * 22); pctx.stroke();
+    }
+    pctx.fillStyle = '#d8d4cc'; pctx.font = '22px monospace';
+    pctx.fillText('OUTER RIM', 30, 50);
+    pctx.font = '13px monospace';
+    pctx.fillText('CHARTED ROUTES K-7', 30, 70);
+    const ptex = new THREE.CanvasTexture(pc);
+    ptex.colorSpace = THREE.SRGBColorSpace;
+    const poster = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.66, 1.0),
+      new THREE.MeshStandardMaterial({ map: ptex, roughness: 0.85 }),
+    );
+    poster.position.set(3.0, 1.6, Q.z0 + 0.012 - WALL_T / 2 + WALL_T / 2);
+    poster.position.z = Q.z0 + 0.01;
+    ship.add(poster);
+    // wall vents
+    for (let k = 0; k < 4; k++) {
+      const v = box(0.5, 0.04, 0.05, M.darkMetal, 1);
+      v.position.set(4.6, 2.0 + k * 0.08, Q.z1 - 0.02 - WALL_T / 2 + WALL_T / 2);
+      v.position.z = Q.z1 - 0.02;
+      ship.add(v);
+    }
+    // small status screen by the door
+    const sc = makeConsoleCanvas(91, 256, 128);
+    const sct = new THREE.CanvasTexture(sc);
+    sct.colorSpace = THREE.SRGBColorSpace;
+    const scMat = new THREE.MeshStandardMaterial({
+      map: sct, emissive: '#ffffff', emissiveMap: sct, emissiveIntensity: 1.1, roughness: 0.4,
+    });
+    regEmissive(scMat, 1.1, 0.35);
+    const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.25), scMat);
+    screen.position.set(1.48, 1.55, 0.0);
+    screen.rotation.y = Math.PI / 2;
+    ship.add(screen);
+  }
 
   // bed along the far wall
   const bed = new THREE.Group();
@@ -509,7 +561,7 @@ export function buildShip(scene) {
     frame.position.set(0, 0.16, 0); bed.add(frame);
     const mattress = box(1.94, 0.18, 0.94, M.fabric, 1);
     mattress.position.set(0, 0.41, 0); bed.add(mattress);
-    const blanket = box(1.3, 0.08, 0.96, M.fabricWarm, 1);
+    const blanket = box(1.3, 0.08, 0.96, M.fabric, 1);
     blanket.position.set(-0.3, 0.52, 0); bed.add(blanket);
     const pillow = box(0.4, 0.12, 0.6, M.fabricWarm, 2);
     pillow.position.set(0.7, 0.53, 0); bed.add(pillow);
@@ -594,28 +646,54 @@ export function buildShip(scene) {
     faucet.position.set(-4.78, 1.05, 3.7);
     faucet.rotation.y = Math.PI / 2;
     galley.add(faucet);
-    // hotplate rings (emissive)
+    // cooktop unit + hotplate rings (emissive)
+    const cooktop = box(0.55, 0.05, 1.0, M.darkMetal, 1);
+    cooktop.position.set(-4.6, 0.99, 1.9);
+    galley.add(cooktop);
     const plateMat = regEmissive(new THREE.MeshStandardMaterial({
-      color: '#170703', emissive: '#ff6a2a', emissiveIntensity: 1.6, roughness: 0.5,
-    }), 1.6, 0.2);
-    for (const dz of [1.6, 2.2]) {
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.025, 8, 24), plateMat);
+      color: '#170703', emissive: '#ff6a2a', emissiveIntensity: 2.2, roughness: 0.5,
+    }), 2.2, 0.2);
+    for (const dz of [1.65, 2.15]) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.028, 8, 24), plateMat);
       ring.rotation.x = Math.PI / 2;
-      ring.position.set(-4.6, 0.98, dz);
+      ring.position.set(-4.6, 1.03, dz);
       galley.add(ring);
-      const ring2 = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.02, 8, 16), plateMat);
+      const ring2 = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.022, 8, 16), plateMat);
       ring2.rotation.x = Math.PI / 2;
-      ring2.position.set(-4.6, 0.98, dz);
+      ring2.position.set(-4.6, 1.03, dz);
       galley.add(ring2);
     }
-    // overhead cabinets
-    const cab = box(0.5, 0.7, 3.0, M.hull, 1);
+    // backsplash + counter props
+    const splash = box(0.05, 0.55, 3.3, M.hullDark, 1);
+    splash.position.set(-4.95, 1.25, 2.8);
+    galley.add(splash);
+    const propDefs = [
+      [0.06, 0.18, -4.5, 2.7], [0.05, 0.13, -4.66, 2.85], [0.07, 0.22, -4.55, 3.15],
+      [0.045, 0.1, -4.7, 4.25], [0.05, 0.15, -4.45, 4.35],
+    ];
+    propDefs.forEach(([r, h, px, pz], i) => {
+      const can = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 10), i % 2 ? M.metal : M.accent);
+      can.position.set(px, 0.98 + h / 2, pz);
+      galley.add(can);
+    });
+    // mugs on the table
+    for (const [mx, mz] of [[-2.25, 3.6], [-2.55, 3.85]]) {
+      const mug = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.035, 0.08, 10), M.hullCool);
+      mug.position.set(mx, 0.89, mz);
+      galley.add(mug);
+    }
+    // overhead cabinets with inset doors + handles
+    const cab = box(0.5, 0.7, 3.0, M.hullDark, 1);
     cab.position.set(-4.72, 2.0, 2.8);
     galley.add(cab);
-    for (const dz of [1.6, 2.8, 4.0]) {
-      const seam = box(0.04, 0.5, 0.03, M.darkMetal, 1);
-      seam.position.set(-4.45, 2.0, dz);
-      galley.add(seam);
+    for (let i = 0; i < 4; i++) {
+      const dz = 1.45 + i * 0.72;
+      const door = box(0.03, 0.56, 0.62, i === 1 ? M.accent : M.hull, 1);
+      door.position.set(-4.45, 2.0, dz);
+      galley.add(door);
+      const handle = box(0.03, 0.12, 0.025, M.metal, 1);
+      handle.position.set(-4.42, 1.85, dz + 0.22);
+      galley.add(handle);
     }
     // under-cabinet warm strip
     const ucStrip = box(0.04, 0.04, 3.0, warmStripMat);
@@ -659,9 +737,9 @@ export function buildShip(scene) {
   const B = { x0: 1.4, x1: 3.6, z0: 3.4, z1: 5.6 };
   slab(2.5, -0.05, 4.5, 2.2, 0.1, 2.2, M.floor);
   slab(2.5, CEIL_H + 0.05, 4.5, 2.2, 0.1, 2.2, M.hullDark);
-  slab(B.x1 + WALL_T / 2, CEIL_H / 2, 4.5, WALL_T, CEIL_H, 2.2, M.hull);
-  slab(2.5, CEIL_H / 2, B.z0 - WALL_T / 2, 2.2, CEIL_H, WALL_T, M.hull);
-  slab(2.5, CEIL_H / 2, B.z1 + WALL_T / 2, 2.2, CEIL_H, WALL_T, M.hull);
+  slab(B.x1 + WALL_T / 2, CEIL_H / 2, 4.5, WALL_T, CEIL_H, 2.2, M.hullCool);
+  slab(2.5, CEIL_H / 2, B.z0 - WALL_T / 2, 2.2, CEIL_H, WALL_T, M.hullCool);
+  slab(2.5, CEIL_H / 2, B.z1 + WALL_T / 2, 2.2, CEIL_H, WALL_T, M.hullCool);
 
   const bath = new THREE.Group();
   {
@@ -688,6 +766,30 @@ export function buildShip(scene) {
     mirror.position.set(3.66, 1.55, 4.0);
     mirror.rotation.y = -Math.PI / 2;
     bath.add(mirror);
+    // mirror frame + light strip above
+    const mframe = box(0.04, 0.7, 0.55, M.darkMetal, 1);
+    mframe.position.set(3.68, 1.55, 4.0);
+    bath.add(mframe);
+    const mlight = box(0.04, 0.06, 0.5, whiteStripMat);
+    mlight.position.set(3.63, 1.95, 4.0);
+    bath.add(mlight);
+    // pipes under the sink, towel bar, vent
+    const p1 = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.6, 8), M.metal);
+    p1.position.set(3.42, 0.45, 4.12);
+    p1.rotation.z = 0.2;
+    bath.add(p1);
+    const towel = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.6, 8), M.metal);
+    towel.rotation.x = Math.PI / 2;
+    towel.position.set(1.52, 1.15, 4.9);
+    bath.add(towel);
+    const towelCloth = box(0.04, 0.42, 0.45, M.fabricWarm, 2);
+    towelCloth.position.set(1.55, 0.95, 4.9);
+    bath.add(towelCloth);
+    for (let k = 0; k < 3; k++) {
+      const v = box(0.4, 0.035, 0.05, M.darkMetal, 1);
+      v.position.set(2.3, 2.25 + k * 0.07, B.z1 - 0.02);
+      ship.add(v);
+    }
     ship.add(bath);
   }
   bath.userData = { label: 'E: Freshen Up', action: 'refresh' };
@@ -739,5 +841,6 @@ export function buildShip(scene) {
     interactables: [bed, galleyRef.group, bath],
     setRestMix,
     update,
+    probe: () => lightRegistry.slice(0, 6).map((e) => (e.light ? e.light.intensity : e.mat.emissiveIntensity)),
   };
 }
