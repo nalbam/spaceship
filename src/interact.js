@@ -159,5 +159,16 @@ export function setupInteractions({ camera, interactables, player, setRestMix })
     setRestMix(m);
   }
 
-  return { update, setMix };
+  return {
+    update,
+    setMix,
+    dbg: () => {
+      raycaster.setFromCamera(center, camera);
+      const r = interactables.map((g) => {
+        const h = raycaster.intersectObject(g, true);
+        return h.length ? +h[0].distance.toFixed(2) : null;
+      });
+      return { hovered: hovered?.userData?.label ?? null, busy, r, far: raycaster.far };
+    },
+  };
 }

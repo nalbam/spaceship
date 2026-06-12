@@ -29,6 +29,9 @@ const GrainVignetteShader = {
     }
     void main() {
       vec4 col = texture2D(tDiffuse, vUv);
+      // split toning: teal shadows, warm highlights — coheres the palette
+      float lum = dot(col.rgb, vec3(0.299, 0.587, 0.114));
+      col.rgb *= mix(vec3(0.93, 1.02, 1.06), vec3(1.05, 1.0, 0.94), smoothstep(0.12, 0.65, lum));
       // vignette
       vec2 d = vUv - 0.5;
       float v = 1.0 - dot(d, d) * vignette * 2.4;

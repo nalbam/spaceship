@@ -74,3 +74,28 @@
 ### Judge notes
 - ✅ Rest cycle corridor: cooler, dimmer, teal guidance — reads as night watch.
 - ✅ All 9 framed shots pass; interaction flow (prompt → black + "8 HOURS PASS" → rest wake) verified.
+
+## Iteration 7 — final polish + full verification
+- Split toning in the grade (teal shadows / warm highlights) — palette coheres.
+- Galley pendant lamp over the table; bathroom shelf/bottles/teal base glow; bathroom reframed.
+- Collision verified numerically: walking into quarters wall stops at x=1.08 (wall 1.4 − radius 0.32);
+  stern bulkhead stops at z=6.68. No wall penetration.
+- Eat interaction verified: hover "E: Eat" → E → clock +20 min. (Sleep verified in iter 5;
+  refresh shares the same fade path.)
+- Root-caused headless flakiness: rAF idles between CDP captures, so tests now wait on
+  `__shot.frames()` deltas instead of wall time.
+- Final scene: 282 meshes / 12 lights / ~17k tris. 60 fps headroom is large
+  (SwiftShader software GL renders this at 10 fps at 720p — a real GPU is orders faster).
+
+## Status: DONE — rubric check
+- ✅ Pointer lock + WASD + mouse look, eye 1.7 m, head bob, capsule-vs-AABB collision (verified)
+- ✅ Corridor + cockpit (3-pane viewport) + quarters + galley + bathroom, used-future dressing,
+  no large bare surfaces; greebles, pipes, grates, stencils, grime everywhere
+- ✅ 3 raycast interactions with hover highlight + prompts + fades + rest-cycle lighting (verified)
+- ✅ One-line HUD status readout
+- ✅ Windows: drifting parallax stars (3 shells + near dust), gas giant with atmosphere rim sliding
+  past on a 75 s orbit, nebula billboards
+- ✅ ACES + bloom + N8AO + vignette + film grain + corridor fog
+- ✅ 3+ PBR families (painted panel, worn/brushed metal, fabric + rubber), roughness variation, PMREM env
+- ✅ Cohesive palette: off-white hull / orange accents / teal practicals
+- ✅ Procedural everything; Vite + three modules: player/ship/space/interact/post/main (+textures)

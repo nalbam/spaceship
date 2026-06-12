@@ -733,6 +733,20 @@ export function buildShip(scene) {
       mug.position.set(mx, 0.89, mz);
       galley.add(mug);
     }
+    // pendant lamp over the table
+    const cord = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.55, 6), M.rubber);
+    cord.position.set(-2.4, CEIL_H - 0.28, 3.7);
+    galley.add(cord);
+    const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.17, 0.14, 12, 1, true), M.accent);
+    shade.position.set(-2.4, CEIL_H - 0.6, 3.7);
+    galley.add(shade);
+    const bulb = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.09, 0.03, 10), warmStripMat);
+    bulb.position.set(-2.4, CEIL_H - 0.66, 3.7);
+    galley.add(bulb);
+    const pendantLight = new THREE.PointLight('#ffc37a', 0, 3.5, 1.8);
+    pendantLight.position.set(-2.4, CEIL_H - 0.75, 3.7);
+    galley.add(pendantLight);
+    regLight(pendantLight, 2.2, 0.25);
     // overhead cabinets with inset doors + handles
     const cab = box(0.5, 0.7, 3.0, M.hullDark, 1);
     cab.position.set(-4.72, 2.0, 2.8);
@@ -841,6 +855,22 @@ export function buildShip(scene) {
       v.position.set(2.3, 2.25 + k * 0.07, B.z1 - 0.02);
       ship.add(v);
     }
+    // teal base glow + shelf with bottles
+    const baseGlow = box(0.03, 0.025, 2.0, tealStripMat);
+    baseGlow.position.set(B.x1 - 0.06, 0.04, 4.5);
+    bath.add(baseGlow);
+    const shelf = box(0.25, 0.04, 0.7, M.metal, 1);
+    shelf.position.set(3.5, 1.25, 4.9);
+    bath.add(shelf);
+    const bottleDefs = [[3.45, 4.7, 0.14], [3.55, 4.95, 0.1], [3.5, 5.15, 0.18]];
+    bottleDefs.forEach(([bx, bz, bh], i) => {
+      const b = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.035, 0.035, bh, 8),
+        i === 1 ? M.accent : M.hullCool,
+      );
+      b.position.set(bx, 1.27 + bh / 2, bz);
+      bath.add(b);
+    });
     ship.add(bath);
   }
   bath.userData = { label: 'E: Freshen Up', action: 'refresh' };

@@ -45,7 +45,7 @@ window.addEventListener('resize', () => {
 });
 
 const clock = new THREE.Clock();
-let frames = 0, fpsAcc = 0, lastFps = 0;
+let frames = 0, fpsAcc = 0, lastFps = 0, totalFrames = 0;
 
 function tick() {
   const dt = Math.min(clock.getDelta(), 0.1);
@@ -55,7 +55,7 @@ function tick() {
   space.update(dt, elapsed);
   interactions.update(dt);
   post.render(dt);
-  frames++; fpsAcc += dt;
+  frames++; totalFrames++; fpsAcc += dt;
   if (fpsAcc >= 1) { lastFps = frames / fpsAcc; frames = 0; fpsAcc = 0; }
   requestAnimationFrame(tick);
 }
@@ -68,7 +68,27 @@ window.__shot = {
   setTime(t) { clock.elapsedTime = t; },
   rest(m) { interactions.setMix(m); },
   fps() { return lastFps; },
+  frames() { return totalFrames; },
   probe() { return ship.probe(); },
+  // collision smoke test: march the player capsule and return where it stopped
+  walk(x, z, dx, dz, steps) {
+    player.position.set(x, 0, z);
+    for (let i = 0; i < steps; i++) {
+      player.position.x += dx; player.position.z += dz;
+      player.collide(player.position);
+    }
+    return { x: player.position.x, z: player.position.z };
+  },
+  idbg() { return interactions.dbg(); },
+  ray() {
+    const rc = new THREE.Raycaster();
+    rc.far = 6;
+    rc.setFromCamera(new THREE.Vector2(0, 0), camera);
+    return ship.interactables.map((g) => {
+      const h = rc.intersectObject(g, true);
+      return h.length ? { label: g.userData.label, d: +h[0].distance.toFixed(2) } : null;
+    });
+  },
   stats() {
     let meshes = 0, lights = 0, tris = 0;
     scene.traverse((o) => {

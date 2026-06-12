@@ -58,7 +58,7 @@ const SHOTS = [
   ['04_porthole', -0.4, 1.62, -3.0, Math.PI / 2, 0, 56],
   ['05_quarters', 2.0, 1.7, -0.4, -0.76, -0.1, 18],
   ['06_galley', -2.0, 1.7, 3.9, 1.02, -0.1, 18],
-  ['07_bathroom', 1.7, 1.7, 3.9, -2.0, -0.18, 18],
+  ['07_bathroom', 1.7, 1.65, 5.3, -0.89, -0.3, 18],
   ['08_corridor_aft', 0, 1.7, -5.5, Math.PI, 0.0, 18],
   ['10_seats', 1.4, 1.5, -10.7, 2.45, -0.35, 18],
 ];
@@ -121,6 +121,33 @@ await page.screenshot({ path: 'shots/09_rest_cycle.png' });
 console.log('shot 09_rest_cycle');
 console.log('POST-09 PROBE', JSON.stringify(await page.evaluate(() => window.__shot.probe())));
 await page.evaluate(() => window.__shot.rest(0));
+
+// collision smoke tests: walk into the quarters wall (+x) and the stern bulkhead (+z)
+const col1 = await page.evaluate(() => window.__shot.walk(0, 0, 0.05, 0, 60)); // expect x ≈ 1.08
+const col2 = await page.evaluate(() => window.__shot.walk(0, 5, 0, 0.05, 80)); // expect z ≈ 6.68
+console.log('COLLISION', JSON.stringify({ col1, col2 }));
+
+// eat interaction: aim at the galley counter, press E, clock/energy should change.
+// headless rAF can idle between captures — wait for real frames, not wall time.
+async function waitFrames(min) {
+  const n0 = await page.evaluate(() => window.__shot.frames());
+  await page.waitForFunction(
+    (base, k) => window.__shot.frames() > base + k,
+    { timeout: 15000, polling: 100 }, n0, min,
+  );
+}
+await page.evaluate(() => window.__shot.set(-3.2, 1.7, 2.8, Math.PI / 2, -0.25));
+await waitFrames(3);
+console.log('IDBG', JSON.stringify(await page.evaluate(() => window.__shot.idbg())));
+const eat = await page.evaluate(() => {
+  const before = document.getElementById('status').textContent;
+  const prompt = document.getElementById('prompt').textContent;
+  document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyE' }));
+  return { before, prompt };
+});
+await new Promise((r) => setTimeout(r, 800));
+const eatAfter = await page.evaluate(() => document.getElementById('status').textContent);
+console.log('EAT', JSON.stringify({ ...eat, after: eatAfter }));
 
 // stats
 const stats = await page.evaluate(() => ({ fps: window.__shot.fps(), scene: window.__shot.stats() }));
