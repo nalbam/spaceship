@@ -77,6 +77,7 @@ window.__shot = {
   weapon() { return weapon.debug(); },
   fire() { weapon.fire(); },
   aim(v) { weapon.setAiming(v); },
+  reload() { weapon.reload(); },
   pos() { return { x: player.position.x, y: player.position.y, z: player.position.z, grounded: player.grounded }; },
   probe() { return ship.probe(); },
   // collision smoke test: march the player capsule and return where it stopped

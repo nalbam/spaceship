@@ -79,8 +79,15 @@ export function setupWeapon({ scene, camera, player, targetGroup }) {
 
   const HIP_POS = new THREE.Vector3(0.22, -0.2, -0.42);
   const ADS_POS = new THREE.Vector3(0, -0.115, -0.34);
+  // hip: barrel converges on the crosshair point a few meters out, so the muzzle
+  // visibly points where the bolts land
+  const CONVERGE = new THREE.Vector3(0, 0, -6);
+  const hipQuat = new THREE.Quaternion().setFromRotationMatrix(
+    new THREE.Matrix4().lookAt(HIP_POS, CONVERGE, new THREE.Vector3(0, 1, 0)),
+  );
+  const adsQuat = new THREE.Quaternion();
   gun.position.copy(HIP_POS);
-  gun.rotation.y = 0.06;
+  gun.quaternion.copy(hipQuat);
   camera.add(gun);
 
   // ---- state
@@ -91,6 +98,14 @@ export function setupWeapon({ scene, camera, player, targetGroup }) {
   let flash = 0;
   const decals = [];
   const sparks = [];
+  const bolts = [];
+  const BOLT_SPEED = 60; // m/s
+  const boltGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.55, 6);
+  boltGeo.rotateX(Math.PI / 2); // axis along z
+  const boltMat = new THREE.MeshBasicMaterial({
+    color: '#ff7a35', transparent: true, opacity: 0.95,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
   const scorchTex = scorchTexture();
   const raycaster = new THREE.Raycaster();
   raycaster.far = 60;
@@ -140,12 +155,21 @@ export function setupWeapon({ scene, camera, player, targetGroup }) {
     raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
     const hits = raycaster.intersectObject(targetGroup, true)
       .filter((h) => h.face && h.object.visible && !h.object.material?.transparent);
-    if (hits.length) {
-      const h = hits[0];
-      const n = h.face.normal.clone().transformDirection(h.object.matrixWorld);
-      spawnDecal(h.point, n);
-      playHit();
-    }
+    const hit = hits.length ? {
+      point: hits[0].point.clone(),
+      normal: hits[0].face.normal.clone().transformDirection(hits[0].object.matrixWorld),
+    } : null;
+    // visible bolt flies from the muzzle to the impact point
+    const muzzle = gun.localToWorld(new THREE.Vector3(0, 0.012, -0.27));
+    const end = hit ? hit.point : raycaster.ray.at(50, new THREE.Vector3());
+    const dir = end.clone().sub(muzzle);
+    const dist = dir.length();
+    dir.normalize();
+    const bolt = new THREE.Mesh(boltGeo, boltMat);
+    bolt.position.copy(muzzle);
+    bolt.lookAt(end);
+    scene.add(bolt);
+    bolts.push({ mesh: bolt, dir, remaining: dist, hit });
   }
 
   function reload() {
@@ -185,11 +209,31 @@ export function setupWeapon({ scene, camera, player, targetGroup }) {
       camera.fov += (targetFov - camera.fov) * Math.min(1, dt * 12);
       camera.updateProjectionMatrix();
     }
+    // reload motion: dip + tilt that peaks mid-reload
+    const dip = reloading > 0 ? Math.sin((1 - reloading / RELOAD_TIME) * Math.PI) : 0;
     tmp.copy(aiming ? ADS_POS : HIP_POS);
     tmp.z += recoil * 0.05; // kickback
+    tmp.y -= dip * 0.13;
     gun.position.lerp(tmp, Math.min(1, dt * 14));
-    gun.rotation.x = recoil * 0.12;
+    gun.quaternion.slerp(aiming ? adsQuat : hipQuat, Math.min(1, dt * 14));
+    gun.rotateX(recoil * 0.12 - dip * 0.75);
+    gun.rotateZ(dip * 0.35);
     recoil = Math.max(0, recoil - dt * 7);
+    // bolts in flight: advance, impact at the end of the path
+    for (let i = bolts.length - 1; i >= 0; i--) {
+      const b = bolts[i];
+      const step = Math.min(BOLT_SPEED * dt, b.remaining);
+      b.mesh.position.addScaledVector(b.dir, step);
+      b.remaining -= step;
+      if (b.remaining <= 0.001) {
+        if (b.hit) {
+          spawnDecal(b.hit.point, b.hit.normal);
+          playHit();
+        }
+        scene.remove(b.mesh);
+        bolts.splice(i, 1);
+      }
+    }
     // muzzle flash decay
     flash = Math.max(0, flash - dt * 14);
     flashLight.intensity = flash * 6;
@@ -220,7 +264,7 @@ export function setupWeapon({ scene, camera, player, targetGroup }) {
 
   return {
     update,
-    debug: () => ({ ammo, reloading: +reloading.toFixed(2), aiming, fov: +camera.fov.toFixed(1), decals: decals.length }),
+    debug: () => ({ ammo, reloading: +reloading.toFixed(2), aiming, fov: +camera.fov.toFixed(1), decals: decals.length, bolts: bolts.length }),
     fire, // exposed for the headless rig
     reload,
     setAiming(v) { aiming = v; },

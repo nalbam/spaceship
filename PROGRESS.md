@@ -141,3 +141,12 @@
 - Fix: fire() updates camera.matrixWorld before the raycast (teleport-then-fire missed).
 - Verified headless: LMB → ammo 11/12 + HUD; RMB → fov 52; R → "RELOADING…" → 12/12;
   decal spawns on wall and expires at 10 s page time; transparent glass is shoot-through.
+
+## Fix — muzzle alignment + reload motion
+- Hip pose now converges the barrel on the crosshair point 6 m out (Matrix4.lookAt quat),
+  and every shot spawns a visible blaster bolt that flies muzzle → impact point (60 m/s);
+  the decal + hit sound trigger on bolt arrival, so muzzle, tracer, and mark all line up.
+- Reload motion: gun dips/tilts (sin peak mid-reload) over the 1.2 s timer, matching the
+  three mech-click sounds.
+- Verified headless: bolt in flight (bolts:1) → impact (decals:1); mid-reload dip frame
+  captured; reload completes to 12/12 (an apparent off-by-one was debug toFixed rounding).
