@@ -168,3 +168,11 @@
 - Run flag is grounded-gated and forward-gated: Shift-while-idle and Shift+back do not run.
 - Verified headless: walk dz 5.46 m / fov 72 vs run dz 9.02 m / fov 66 over 20 frames;
   shift-idle and shift-back stay walking (running:false, fov 72).
+
+## Fix — dry-fire click during reload
+- Firing was already blocked mid-reload but silent. Now fire() during reload plays the empty
+  dry-click (playEmpty) per trigger pull — clear "can't shoot yet" feedback.
+- player.frozen still returns silently (interactions/fades). Order: frozen → reloading(click) →
+  empty(click) → fire.
+- Verified headless: 3 trigger pulls during reload leave ammo unchanged (blocked), reload still
+  completes to full mag.

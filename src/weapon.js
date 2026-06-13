@@ -143,7 +143,8 @@ export function setupWeapon({ scene, camera, player, targetGroup }) {
   }
 
   function fire() {
-    if (reloading > 0 || player.frozen) return;
+    if (player.frozen) return;
+    if (reloading > 0) { playEmpty(); return; } // dry click — can't fire mid-reload
     if (ammo <= 0) { playEmpty(); return; }
     ammo--;
     updateHud();
