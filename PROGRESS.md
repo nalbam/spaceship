@@ -187,3 +187,12 @@
   portholes — the only transparent meshes in ship.group) now stop bolts and take a scorch.
 - Verified headless: cockpit viewport and porthole both register hits (decals increment) where
   bolts previously passed through to space; visual confirms a scorch mark on the glass pane.
+
+## Change — narrow interaction targets
+- Eat: was the whole galley group; now only the stove (cooktop + hotplate rings) sub-group.
+- Refresh: was the whole bathroom group; now only the toilet + sink fixtures sub-group
+  (counter/table/cabinets/towel/mirror no longer trigger).
+- Sub-groups carry the userData; hover highlight now lights just the fixture. Removed dead
+  galleyRef.group.
+- Verified headless (computed aim at each target): stove→Eat, toilet/sink→Refresh;
+  table, cabinet, towel-wall all return no prompt.

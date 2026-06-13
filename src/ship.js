@@ -697,10 +697,12 @@ export function buildShip(scene) {
     faucet.position.set(-4.78, 1.05, 3.7);
     faucet.rotation.y = Math.PI / 2;
     galley.add(faucet);
-    // cooktop unit + hotplate rings (emissive)
+    // cooktop unit + hotplate rings (emissive) — eat is only available at the stove
+    const stove = new THREE.Group();
+    galley.add(stove);
     const cooktop = box(0.55, 0.05, 1.0, M.darkMetal, 1);
     cooktop.position.set(-4.6, 0.99, 1.9);
-    galley.add(cooktop);
+    stove.add(cooktop);
     const plateMat = regEmissive(new THREE.MeshStandardMaterial({
       color: '#170703', emissive: '#ff6a2a', emissiveIntensity: 2.2, roughness: 0.5,
     }), 2.2, 0.2);
@@ -708,12 +710,14 @@ export function buildShip(scene) {
       const ring = new THREE.Mesh(new THREE.TorusGeometry(0.13, 0.028, 8, 24), plateMat);
       ring.rotation.x = Math.PI / 2;
       ring.position.set(-4.6, 1.03, dz);
-      galley.add(ring);
+      stove.add(ring);
       const ring2 = new THREE.Mesh(new THREE.TorusGeometry(0.065, 0.022, 8, 16), plateMat);
       ring2.rotation.x = Math.PI / 2;
       ring2.position.set(-4.6, 1.03, dz);
-      galley.add(ring2);
+      stove.add(ring2);
     }
+    stove.userData = { label: 'E: Eat', action: 'eat' };
+    galleyRef.eat = stove;
     // backsplash + counter props
     const splash = box(0.05, 0.55, 3.3, M.hullDark, 1);
     splash.position.set(-4.95, 1.25, 2.8);
@@ -784,8 +788,6 @@ export function buildShip(scene) {
     }
     ship.add(galley);
   }
-  galley.userData = { label: 'E: Eat', action: 'eat' };
-  galleyRef.group = galley;
 
   const gLight = new THREE.PointLight('#ffd9a0', 0, 6, 1.8);
   gLight.position.set(-3.6, CEIL_H - 0.4, 2.8);
@@ -807,22 +809,25 @@ export function buildShip(scene) {
   slab(2.5, CEIL_H / 2, B.z1 + WALL_T / 2, 2.2, CEIL_H, WALL_T, M.hullCool);
 
   const bath = new THREE.Group();
+  // refresh is only available at the toilet + sink fixtures, not the whole room
+  const bathFixtures = new THREE.Group();
+  bath.add(bathFixtures);
   {
     // compact san-unit: seat + tank
     const unit = box(0.5, 0.45, 0.45, M.hullDark, 1);
     unit.position.set(3.25, 0.225, 5.2);
-    bath.add(unit);
+    bathFixtures.add(unit);
     const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.22, 0.06, 14), M.hull);
     lid.position.set(3.25, 0.48, 5.2);
-    bath.add(lid);
+    bathFixtures.add(lid);
     addCollider(3.25, 0.3, 5.2, 0.5, 0.6, 0.5);
     // sink + mirror
     const basin = box(0.45, 0.12, 0.4, M.metal, 1);
     basin.position.set(3.3, 0.85, 4.0);
-    bath.add(basin);
+    bathFixtures.add(basin);
     const pedestal = box(0.18, 0.85, 0.18, M.darkMetal, 1);
     pedestal.position.set(3.3, 0.42, 4.0);
-    bath.add(pedestal);
+    bathFixtures.add(pedestal);
     addCollider(3.3, 0.5, 4.0, 0.5, 1.0, 0.45);
     const mirror = new THREE.Mesh(
       new THREE.PlaneGeometry(0.45, 0.6),
@@ -873,7 +878,7 @@ export function buildShip(scene) {
     });
     ship.add(bath);
   }
-  bath.userData = { label: 'E: Freshen Up', action: 'refresh' };
+  bathFixtures.userData = { label: 'E: Freshen Up', action: 'refresh' };
 
   const bLight = new THREE.PointLight('#dcecff', 0, 4, 1.8);
   bLight.position.set(2.5, CEIL_H - 0.3, 4.5);
@@ -919,7 +924,7 @@ export function buildShip(scene) {
   return {
     group: ship,
     colliders,
-    interactables: [bed, galleyRef.group, bath],
+    interactables: [bed, galleyRef.eat, bathFixtures],
     setRestMix,
     update,
     probe: () => lightRegistry.slice(0, 6).map((e) => (e.light ? e.light.intensity : e.mat.emissiveIntensity)),
