@@ -8,6 +8,7 @@ const RELOAD_TIME = 1.2;
 const DECAL_LIFE = 10; // seconds until a scorch mark is gone
 const FOV_HIP = 72;
 const FOV_ADS = 52;
+const FOV_RUN = 66; // slight zoom-in while running (lower = more zoom; raise above 72 to zoom out instead)
 
 function scorchTexture() {
   const S = 128;
@@ -210,8 +211,8 @@ export function setupWeapon({ scene, camera, player, targetGroup }) {
         updateHud();
       }
     }
-    // ADS: slight zoom + gun to center
-    const targetFov = aiming && !player.frozen ? FOV_ADS : FOV_HIP;
+    // FOV: ADS wins, else slight zoom-in while running, else hip
+    const targetFov = aiming && !player.frozen ? FOV_ADS : (player.running ? FOV_RUN : FOV_HIP);
     if (Math.abs(camera.fov - targetFov) > 0.05) {
       camera.fov += (targetFov - camera.fov) * Math.min(1, dt * 12);
       camera.updateProjectionMatrix();

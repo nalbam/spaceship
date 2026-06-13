@@ -159,3 +159,12 @@
   (dip + recoil, absolute) — structurally no accumulation at any frame rate.
 - Motion shaped as drop → hold low (mag swap) → raise, via smoothstep envelope.
 - Verified: peak rotation 0.52 rad during reload, final pose returns exactly to idle.
+
+## Feature — running (Shift + forward)
+- Hold Shift while moving forward (W) → RUN_SPEED 4.5 m/s (vs 2.6 walk); requires grounded + locked.
+- Run zoom: weapon.js (the FOV owner) reads player.running → FOV 72 → 66 (slight zoom-in per request;
+  FOV_RUN constant flips it to zoom-out if raised above 72). ADS still wins when aiming.
+- Faster, deeper head bob while running (bobPhase ×13 vs ×9, amplitude ×1.5) → quicker footstep cadence.
+- Run flag is grounded-gated and forward-gated: Shift-while-idle and Shift+back do not run.
+- Verified headless: walk dz 5.46 m / fov 72 vs run dz 9.02 m / fov 66 over 20 frames;
+  shift-idle and shift-back stay walking (running:false, fov 72).

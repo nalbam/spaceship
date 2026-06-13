@@ -13,7 +13,8 @@ npm install
 npm run dev      # open the printed URL, click to grab pointer lock
 ```
 
-- **WASD** move · **mouse** look · **Space** jump · **E** interact
+- **WASD** move · **Shift** run (hold + forward, slight zoom) · **mouse** look · **Space** jump · **E** interact
+- **RMB** aim (zoom) · **LMB** fire · **R** reload
 - Interactions: bed (sleep → time skip + rest-cycle lighting), galley (eat), bathroom (refresh)
 
 ## Screenshot / self-review rig
@@ -32,7 +33,7 @@ movement, collision, and the interaction flow end to end.
 | Module | Responsibility |
 | --- | --- |
 | `src/main.js` | renderer, scene, PMREM env, frame loop, debug rig |
-| `src/player.js` | pointer lock, WASD, Space jump (gravity, ceiling bump, landing on furniture), head bob, capsule-vs-AABB collision |
+| `src/player.js` | pointer lock, WASD, Shift run, Space jump (gravity, ceiling bump, landing on furniture), head bob, capsule-vs-AABB collision |
 | `src/ship.js` | interior kit-bash: corridor, cockpit, quarters, galley, bathroom; lights + rest-cycle mix |
 | `src/space.js` | parallax star shells, near dust drift, gas giant + atmosphere rim, nebula billboards |
 | `src/interact.js` | center-screen raycast, hover highlight + prompt, sleep/eat/refresh flows, HUD status |
