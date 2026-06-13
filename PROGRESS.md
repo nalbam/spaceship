@@ -176,3 +176,8 @@
   empty(click) → fire.
 - Verified headless: 3 trigger pulls during reload leave ammo unchanged (blocked), reload still
   completes to full mag.
+
+## Fix — silent reload (reverts dry-click)
+- Per updated request: while reloading, firing does nothing AND makes no sound (no dry-click).
+- fire() returns silently for frozen or reloading; playEmpty() now only for a truly empty mag.
+- Verified headless: trigger pulls during reload leave ammo unchanged, no empty-click path hit.
