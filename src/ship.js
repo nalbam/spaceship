@@ -550,8 +550,10 @@ export function buildShip(scene) {
   slab(3.4, -0.05, -1.5, 4.0, 0.1, 4.0, M.floor);
   slab(3.4, CEIL_H + 0.05, -1.5, 4.0, 0.1, 4.0, M.hullDark);
   slab(Q.x1 + WALL_T / 2, CEIL_H / 2, -1.5, WALL_T, CEIL_H, 4.0, M.hullWarm);
-  slab(3.4, CEIL_H / 2, Q.z0 - WALL_T / 2, 4.0, CEIL_H, WALL_T, M.hullWarm);
-  slab(3.4, CEIL_H / 2, Q.z1 + WALL_T / 2, 4.0, CEIL_H, WALL_T, M.hullWarm);
+  // cross-walls butt against the corridor wall's room face (x=1.55), not its
+  // corridor face (1.4) — overlapping to 1.4 made coplanar faces that z-fight
+  slab(3.475, CEIL_H / 2, Q.z0 - WALL_T / 2, 3.85, CEIL_H, WALL_T, M.hullWarm);
+  slab(3.475, CEIL_H / 2, Q.z1 + WALL_T / 2, 3.85, CEIL_H, WALL_T, M.hullWarm);
   // quarters dressing: ceiling pipe, wall poster, vents, status screen
   {
     const pipe = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 3.8, 10), M.metal);
@@ -676,8 +678,8 @@ export function buildShip(scene) {
   slab(-3.2, -0.05, 2.8, 3.6, 0.1, 3.6, M.floor);
   slab(-3.2, CEIL_H + 0.05, 2.8, 3.6, 0.1, 3.6, M.hullDark);
   slab(G.x0 - WALL_T / 2, CEIL_H / 2, 2.8, WALL_T, CEIL_H, 3.6, M.hull);
-  slab(-3.2, CEIL_H / 2, G.z0 - WALL_T / 2, 3.6, CEIL_H, WALL_T, M.hull);
-  slab(-3.2, CEIL_H / 2, G.z1 + WALL_T / 2, 3.6, CEIL_H, WALL_T, M.hull);
+  slab(-3.275, CEIL_H / 2, G.z0 - WALL_T / 2, 3.45, CEIL_H, WALL_T, M.hull);
+  slab(-3.275, CEIL_H / 2, G.z1 + WALL_T / 2, 3.45, CEIL_H, WALL_T, M.hull);
 
   const galley = new THREE.Group();
   {
@@ -805,8 +807,8 @@ export function buildShip(scene) {
   slab(2.5, -0.05, 4.5, 2.2, 0.1, 2.2, M.floor);
   slab(2.5, CEIL_H + 0.05, 4.5, 2.2, 0.1, 2.2, M.hullDark);
   slab(B.x1 + WALL_T / 2, CEIL_H / 2, 4.5, WALL_T, CEIL_H, 2.2, M.hullCool);
-  slab(2.5, CEIL_H / 2, B.z0 - WALL_T / 2, 2.2, CEIL_H, WALL_T, M.hullCool);
-  slab(2.5, CEIL_H / 2, B.z1 + WALL_T / 2, 2.2, CEIL_H, WALL_T, M.hullCool);
+  slab(2.575, CEIL_H / 2, B.z0 - WALL_T / 2, 2.05, CEIL_H, WALL_T, M.hullCool);
+  slab(2.575, CEIL_H / 2, B.z1 + WALL_T / 2, 2.05, CEIL_H, WALL_T, M.hullCool);
 
   const bath = new THREE.Group();
   // refresh is only available at the toilet + sink fixtures, not the whole room

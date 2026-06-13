@@ -196,3 +196,14 @@
   galleyRef.group.
 - Verified headless (computed aim at each target): stove→Eat, toilet/sink→Refresh;
   table, cabinet, towel-wall all return no prompt.
+
+## Fix — wall z-fighting
+- Root cause (found via a coplanar same-facing-face detector over ship.group): each room's
+  cross-walls (quarters/galley/bathroom front+back) extended their corridor end to the corridor
+  wall's *corridor-side* face (x=±1.40), so their end-cap was exactly coplanar and co-facing with
+  the corridor wall face — gap 0, ~0.39 m² each → flicker on the corridor walls.
+- Fix: cross-walls now start at the corridor wall's *room-side* face (x=±1.55), butting cleanly
+  (corridor wall already fills x[1.40,1.55] there). No gap, collision still solid.
+- Detector confirms all 6 visible x=±1.4 coplanar overlaps gone. Remaining detector hits are
+  back-faced (cockpit greebles/trim, kick-band rear) or occluded (mirror behind wall) — culled,
+  not rendered, so no visible fight. Junction + corridor screenshots show clean walls, no seam.
