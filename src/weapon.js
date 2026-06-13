@@ -154,8 +154,9 @@ export function setupWeapon({ scene, camera, player, targetGroup }) {
     // hit scan against the ship interior
     camera.updateMatrixWorld();
     raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+    // glass (transparent) blocks bolts too — only skip non-geometry / hidden hits
     const hits = raycaster.intersectObject(targetGroup, true)
-      .filter((h) => h.face && h.object.visible && !h.object.material?.transparent);
+      .filter((h) => h.face && h.object.visible);
     const hit = hits.length ? {
       point: hits[0].point.clone(),
       normal: hits[0].face.normal.clone().transformDirection(hits[0].object.matrixWorld),

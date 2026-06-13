@@ -181,3 +181,9 @@
 - Per updated request: while reloading, firing does nothing AND makes no sound (no dry-click).
 - fire() returns silently for frozen or reloading; playEmpty() now only for a truly empty mag.
 - Verified headless: trigger pulls during reload leave ammo unchanged, no empty-click path hit.
+
+## Fix — glass blocks bolts
+- Hit scan dropped the `!material.transparent` filter, so glass panes (cockpit viewport +
+  portholes — the only transparent meshes in ship.group) now stop bolts and take a scorch.
+- Verified headless: cockpit viewport and porthole both register hits (decals increment) where
+  bolts previously passed through to space; visual confirms a scorch mark on the glass pane.
