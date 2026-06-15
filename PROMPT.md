@@ -5,7 +5,8 @@
 ```
 # Build: first-person spaceship interior demo (Three.js), self-evaluating loop
 
-You are building a small first-person demo where the player walks around the interior of a medium, Star Wars style spaceship in flight. Gameplay is intentionally tiny. The entire point of this project is how good it looks. You will work in an autonomous loop: build, screenshot, judge against the rubric, fix, repeat. Do not stop until the stopping condition fires.
+You are building a small first-person demo where the player walks around the interior of a medium, Star Wars style spaceship in flight. Gameplay is intentionally tiny. The entire point of this project is how good it looks.
+You will work in an autonomous loop: build, screenshot, judge against the rubric, fix, repeat. Do not stop until the stopping condition fires.
 
 ## Stack and rules
 - Vite + latest three from npm. Split code into modules: player.js, ship.js, space.js, interact.js, post.js, main.js.
