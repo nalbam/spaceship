@@ -44,11 +44,15 @@ export function setupInteractions({ camera, interactables, player, setRestMix })
   }
   updateStatus();
 
+  // One hide timer for the message: a newer message cancels the older timer,
+  // so the latest call's holdMs decides when the text fades out.
+  let messageTimer = null;
   function showMessage(text, holdMs = 1800) {
     const el = messageEl();
     el.textContent = text;
     el.style.opacity = 1;
-    setTimeout(() => { el.style.opacity = 0; }, holdMs);
+    clearTimeout(messageTimer);
+    messageTimer = setTimeout(() => { messageTimer = null; el.style.opacity = 0; }, holdMs);
   }
 
   function fadeTo(opacity, ms = 700) {
