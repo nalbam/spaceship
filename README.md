@@ -11,7 +11,12 @@ by `.github/workflows/deploy.yml` (GitHub Pages, Actions source).
 ```bash
 npm install
 npm run dev      # open the printed URL, click to grab pointer lock
+npm test         # unit tests (Node 22+, node:test with mock timers)
 ```
+
+`npm test` needs Node.js 22 or later. It runs `tests/*.test.js` with the
+built-in `node:test` runner against the real modules, a stub DOM, and virtual
+time. It needs no browser, GPU, or network.
 
 - **WASD** move · **Shift** run (hold + forward, slight zoom) · **mouse** look · **Space** jump · **E** interact
 - **RMB** aim (zoom) · **LMB** fire · **R** reload
