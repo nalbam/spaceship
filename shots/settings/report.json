@@ -1,0 +1,1007 @@
+{
+  "steps": [
+    {
+      "name": "01_start_defaults",
+      "ui": {
+        "open": false,
+        "quality": "high",
+        "volume": "100",
+        "volumeText": "100%",
+        "sensitivity": "1",
+        "sensitivityText": "1.00×",
+        "status": "",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "high",
+        "volume": 1,
+        "sensitivity": 1,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": true
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 320,
+        "drawingBuffer": {
+          "w": 640,
+          "h": 480
+        }
+      },
+      "locked": false,
+      "yaw": 0,
+      "stored": null,
+      "unrelated": "keep",
+      "startHidden": false,
+      "lockElement": false,
+      "hint": "CLICK TO BOARD — WASD MOVE · SHIFT RUN · MOUSE LOOK · SPACE JUMP · E INTERACT",
+      "board": "BOARD",
+      "masterGain": null,
+      "weapon": {
+        "ammo": 12,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 0,
+        "bolts": 0,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:00 · ENERGY 86% · CRUISE 0.42c",
+      "message": ""
+    },
+    {
+      "name": "02_menu_open",
+      "ui": {
+        "open": true,
+        "quality": "high",
+        "volume": "100",
+        "volumeText": "100%",
+        "sensitivity": "1",
+        "sensitivityText": "1.00×",
+        "status": "",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "high",
+        "volume": 1,
+        "sensitivity": 1,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": true
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 320,
+        "drawingBuffer": {
+          "w": 640,
+          "h": 480
+        }
+      },
+      "locked": false,
+      "yaw": 0,
+      "stored": null,
+      "unrelated": "keep",
+      "startHidden": false,
+      "lockElement": false,
+      "hint": "CLICK TO BOARD — WASD MOVE · SHIFT RUN · MOUSE LOOK · SPACE JUMP · E INTERACT",
+      "board": "BOARD",
+      "masterGain": null,
+      "weapon": {
+        "ammo": 12,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 0,
+        "bolts": 0,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:00 · ENERGY 86% · CRUISE 0.42c",
+      "message": ""
+    },
+    {
+      "name": "03_menu_changed",
+      "ui": {
+        "open": true,
+        "quality": "medium",
+        "volume": "35",
+        "volumeText": "35%",
+        "sensitivity": "2.35",
+        "sensitivityText": "2.35×",
+        "status": "SETTINGS SAVED",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "medium",
+        "volume": 0.35,
+        "sensitivity": 2.35,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": true
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 160,
+        "drawingBuffer": {
+          "w": 640,
+          "h": 480
+        }
+      },
+      "locked": false,
+      "yaw": 0,
+      "stored": "{\"quality\":\"medium\",\"volume\":0.35,\"sensitivity\":2.35}",
+      "unrelated": "keep",
+      "startHidden": false,
+      "lockElement": false,
+      "hint": "CLICK TO BOARD — WASD MOVE · SHIFT RUN · MOUSE LOOK · SPACE JUMP · E INTERACT",
+      "board": "BOARD",
+      "masterGain": null,
+      "weapon": {
+        "ammo": 12,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 0,
+        "bolts": 0,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:00 · ENERGY 86% · CRUISE 0.42c",
+      "message": ""
+    },
+    {
+      "name": "04_in_game",
+      "ui": {
+        "open": false,
+        "quality": "medium",
+        "volume": "35",
+        "volumeText": "35%",
+        "sensitivity": "2.35",
+        "sensitivityText": "2.35×",
+        "status": "SETTINGS SAVED",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "medium",
+        "volume": 0.35,
+        "sensitivity": 2.35,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": true
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 160,
+        "drawingBuffer": {
+          "w": 640,
+          "h": 480
+        }
+      },
+      "locked": true,
+      "yaw": 0,
+      "stored": "{\"quality\":\"medium\",\"volume\":0.35,\"sensitivity\":2.35}",
+      "unrelated": "keep",
+      "startHidden": true,
+      "lockElement": true,
+      "hint": "CLICK TO BOARD — WASD MOVE · SHIFT RUN · MOUSE LOOK · SPACE JUMP · E INTERACT",
+      "board": "BOARD",
+      "masterGain": null,
+      "weapon": {
+        "ammo": 12,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 0,
+        "bolts": 0,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:01 · ENERGY 86% · CRUISE 0.42c",
+      "message": ""
+    },
+    {
+      "name": "04b_after_fire",
+      "ui": {
+        "open": false,
+        "quality": "medium",
+        "volume": "35",
+        "volumeText": "35%",
+        "sensitivity": "2.35",
+        "sensitivityText": "2.35×",
+        "status": "SETTINGS SAVED",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "medium",
+        "volume": 0.35,
+        "sensitivity": 2.35,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": true
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 160,
+        "drawingBuffer": {
+          "w": 640,
+          "h": 480
+        }
+      },
+      "locked": true,
+      "yaw": -0.29727499999999996,
+      "stored": "{\"quality\":\"medium\",\"volume\":0.35,\"sensitivity\":2.35}",
+      "unrelated": "keep",
+      "startHidden": true,
+      "lockElement": true,
+      "hint": "CLICK TO BOARD — WASD MOVE · SHIFT RUN · MOUSE LOOK · SPACE JUMP · E INTERACT",
+      "board": "BOARD",
+      "masterGain": 0.3499999940395355,
+      "weapon": {
+        "ammo": 11,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 0,
+        "bolts": 1,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:01 · ENERGY 86% · CRUISE 0.42c",
+      "message": ""
+    },
+    {
+      "name": "05_paused",
+      "ui": {
+        "open": false,
+        "quality": "medium",
+        "volume": "35",
+        "volumeText": "35%",
+        "sensitivity": "2.35",
+        "sensitivityText": "2.35×",
+        "status": "SETTINGS SAVED",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "medium",
+        "volume": 0.35,
+        "sensitivity": 2.35,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": true
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 160,
+        "drawingBuffer": {
+          "w": 640,
+          "h": 480
+        }
+      },
+      "locked": false,
+      "yaw": -0.29727499999999996,
+      "stored": "{\"quality\":\"medium\",\"volume\":0.35,\"sensitivity\":2.35}",
+      "unrelated": "keep",
+      "startHidden": false,
+      "lockElement": false,
+      "hint": "PAUSED — CLICK OR PRESS RESUME TO CONTINUE",
+      "board": "RESUME",
+      "masterGain": 0.3499999940395355,
+      "weapon": {
+        "ammo": 11,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 1,
+        "bolts": 0,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:22 · ENERGY 100% · CRUISE 0.42c",
+      "message": "YOU EAT. ENERGY RESTORED."
+    },
+    {
+      "name": "06_menu_reentry",
+      "ui": {
+        "open": true,
+        "quality": "medium",
+        "volume": "35",
+        "volumeText": "35%",
+        "sensitivity": "2.35",
+        "sensitivityText": "2.35×",
+        "status": "SETTINGS SAVED",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "medium",
+        "volume": 0.35,
+        "sensitivity": 2.35,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": true
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 160,
+        "drawingBuffer": {
+          "w": 640,
+          "h": 480
+        }
+      },
+      "locked": false,
+      "yaw": -0.29727499999999996,
+      "stored": "{\"quality\":\"medium\",\"volume\":0.35,\"sensitivity\":2.35}",
+      "unrelated": "keep",
+      "startHidden": false,
+      "lockElement": false,
+      "hint": "PAUSED — CLICK OR PRESS RESUME TO CONTINUE",
+      "board": "RESUME",
+      "masterGain": 0.3499999940395355,
+      "weapon": {
+        "ammo": 11,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 1,
+        "bolts": 0,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:22 · ENERGY 100% · CRUISE 0.42c",
+      "message": "YOU EAT. ENERGY RESTORED."
+    },
+    {
+      "name": "06b_low",
+      "ui": {
+        "open": true,
+        "quality": "low",
+        "volume": "40",
+        "volumeText": "40%",
+        "sensitivity": "2.35",
+        "sensitivityText": "2.35×",
+        "status": "SETTINGS SAVED",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "low",
+        "volume": 0.4,
+        "sensitivity": 2.35,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": false
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": false
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 160,
+        "drawingBuffer": {
+          "w": 640,
+          "h": 480
+        }
+      },
+      "locked": false,
+      "yaw": -0.29727499999999996,
+      "stored": "{\"quality\":\"low\",\"volume\":0.4,\"sensitivity\":2.35}",
+      "unrelated": "keep",
+      "startHidden": false,
+      "lockElement": false,
+      "hint": "PAUSED — CLICK OR PRESS RESUME TO CONTINUE",
+      "board": "RESUME",
+      "masterGain": 0.4000000059604645,
+      "weapon": {
+        "ammo": 11,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 1,
+        "bolts": 0,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:22 · ENERGY 100% · CRUISE 0.42c",
+      "message": "YOU EAT. ENERGY RESTORED."
+    },
+    {
+      "name": "07_resize_low",
+      "ui": {
+        "open": true,
+        "quality": "low",
+        "volume": "40",
+        "volumeText": "40%",
+        "sensitivity": "2.35",
+        "sensitivityText": "2.35×",
+        "status": "SETTINGS SAVED",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "low",
+        "volume": 0.4,
+        "sensitivity": 2.35,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": false
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": false
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 120,
+        "drawingBuffer": {
+          "w": 480,
+          "h": 320
+        }
+      },
+      "locked": false,
+      "yaw": -0.29727499999999996,
+      "stored": "{\"quality\":\"low\",\"volume\":0.4,\"sensitivity\":2.35}",
+      "unrelated": "keep",
+      "startHidden": false,
+      "lockElement": false,
+      "hint": "PAUSED — CLICK OR PRESS RESUME TO CONTINUE",
+      "board": "RESUME",
+      "masterGain": 0.4000000059604645,
+      "weapon": {
+        "ammo": 11,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 1,
+        "bolts": 0,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:22 · ENERGY 100% · CRUISE 0.42c",
+      "message": "YOU EAT. ENERGY RESTORED."
+    },
+    {
+      "name": "07b_resize_medium",
+      "ui": {
+        "open": true,
+        "quality": "medium",
+        "volume": "40",
+        "volumeText": "40%",
+        "sensitivity": "2.35",
+        "sensitivityText": "2.35×",
+        "status": "SETTINGS SAVED",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "medium",
+        "volume": 0.4,
+        "sensitivity": 2.35,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": true
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 160,
+        "drawingBuffer": {
+          "w": 640,
+          "h": 480
+        }
+      },
+      "locked": false,
+      "yaw": -0.29727499999999996,
+      "stored": "{\"quality\":\"medium\",\"volume\":0.4,\"sensitivity\":2.35}",
+      "unrelated": "keep",
+      "startHidden": false,
+      "lockElement": false,
+      "hint": "PAUSED — CLICK OR PRESS RESUME TO CONTINUE",
+      "board": "RESUME",
+      "masterGain": 0.4000000059604645,
+      "weapon": {
+        "ammo": 11,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 1,
+        "bolts": 0,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:23 · ENERGY 100% · CRUISE 0.42c",
+      "message": "YOU EAT. ENERGY RESTORED."
+    },
+    {
+      "name": "07c_high",
+      "ui": {
+        "open": true,
+        "quality": "high",
+        "volume": "40",
+        "volumeText": "40%",
+        "sensitivity": "2.35",
+        "sensitivityText": "2.35×",
+        "status": "SETTINGS SAVED",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "high",
+        "volume": 0.4,
+        "sensitivity": 2.35,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": true
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": true
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 320,
+        "drawingBuffer": {
+          "w": 640,
+          "h": 480
+        }
+      },
+      "locked": false,
+      "yaw": -0.29727499999999996,
+      "stored": "{\"quality\":\"high\",\"volume\":0.4,\"sensitivity\":2.35}",
+      "unrelated": "keep",
+      "startHidden": false,
+      "lockElement": false,
+      "hint": "PAUSED — CLICK OR PRESS RESUME TO CONTINUE",
+      "board": "RESUME",
+      "masterGain": 0.4000000059604645,
+      "weapon": {
+        "ammo": 11,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 1,
+        "bolts": 0,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:23 · ENERGY 100% · CRUISE 0.42c",
+      "message": "YOU EAT. ENERGY RESTORED."
+    },
+    {
+      "name": "07d_closed",
+      "ui": {
+        "open": false,
+        "quality": "low",
+        "volume": "40",
+        "volumeText": "40%",
+        "sensitivity": "2.35",
+        "sensitivityText": "2.35×",
+        "status": "SETTINGS SAVED",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "low",
+        "volume": 0.4,
+        "sensitivity": 2.35,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": false
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": false
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 160,
+        "drawingBuffer": {
+          "w": 640,
+          "h": 480
+        }
+      },
+      "locked": false,
+      "yaw": -0.29727499999999996,
+      "stored": "{\"quality\":\"low\",\"volume\":0.4,\"sensitivity\":2.35}",
+      "unrelated": "keep",
+      "startHidden": false,
+      "lockElement": false,
+      "hint": "PAUSED — CLICK OR PRESS RESUME TO CONTINUE",
+      "board": "RESUME",
+      "masterGain": 0.4000000059604645,
+      "weapon": {
+        "ammo": 11,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 1,
+        "bolts": 0,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:23 · ENERGY 100% · CRUISE 0.42c",
+      "message": "YOU EAT. ENERGY RESTORED."
+    },
+    {
+      "name": "08_after_reload",
+      "ui": {
+        "open": true,
+        "quality": "low",
+        "volume": "40",
+        "volumeText": "40%",
+        "sensitivity": "2.35",
+        "sensitivityText": "2.35×",
+        "status": "",
+        "statusError": false
+      },
+      "applied": {
+        "quality": "low",
+        "volume": 0.4,
+        "sensitivity": 2.35,
+        "pixelRatio": 1,
+        "passes": [
+          {
+            "name": "RenderPass",
+            "enabled": true
+          },
+          {
+            "name": "N8AOPass",
+            "enabled": false
+          },
+          {
+            "name": "UnrealBloomPass",
+            "enabled": false
+          },
+          {
+            "name": "ShaderPass",
+            "enabled": true
+          },
+          {
+            "name": "OutputPass",
+            "enabled": true
+          }
+        ],
+        "bloomWidth": 160,
+        "drawingBuffer": {
+          "w": 640,
+          "h": 480
+        }
+      },
+      "locked": false,
+      "yaw": 0,
+      "stored": "{\"quality\":\"low\",\"volume\":0.4,\"sensitivity\":2.35}",
+      "unrelated": "keep",
+      "startHidden": false,
+      "lockElement": false,
+      "hint": "CLICK TO BOARD — WASD MOVE · SHIFT RUN · MOUSE LOOK · SPACE JUMP · E INTERACT",
+      "board": "BOARD",
+      "masterGain": null,
+      "weapon": {
+        "ammo": 12,
+        "reloading": 0,
+        "aiming": false,
+        "fov": 72,
+        "decals": 0,
+        "bolts": 0,
+        "rot": [
+          0.036,
+          0.039,
+          -0.001
+        ]
+      },
+      "hud": "SHIP TIME 08:00 · ENERGY 86% · CRUISE 0.42c",
+      "message": ""
+    }
+  ],
+  "consoleErrors": [],
+  "notes": [
+    "Esc key did not release pointer lock in headless Chromium; used document.exitPointerLock() (same pointerlockchange path)"
+  ],
+  "movement": {
+    "p0": {
+      "x": 0,
+      "y": 0,
+      "z": 4.5,
+      "grounded": true,
+      "running": false,
+      "fov": 72
+    },
+    "p1": {
+      "x": 0,
+      "y": 0,
+      "z": 2.9400000000000013,
+      "grounded": true,
+      "running": false,
+      "fov": 72
+    },
+    "yawDelta": 0.5405,
+    "col": {
+      "a": {
+        "x": 1.0799999999999998,
+        "z": 0
+      },
+      "b": {
+        "x": 0,
+        "z": 6.68
+      }
+    },
+    "prompt": "E: Eat",
+    "hudAfterEat": "YOU EAT. ENERGY RESTORED."
+  },
+  "escReleasedLock": false,
+  "storageFailure": {
+    "ui": {
+      "open": true,
+      "quality": "medium",
+      "volume": "80",
+      "volumeText": "80%",
+      "sensitivity": "1",
+      "sensitivityText": "1.00×",
+      "status": "SETTINGS NOT SAVED (STORAGE UNAVAILABLE) — THEY APPLY TO THIS SESSION ONLY",
+      "statusError": true
+    },
+    "applied": {
+      "quality": "medium",
+      "volume": 0.8,
+      "sensitivity": 1,
+      "pixelRatio": 1,
+      "passes": [
+        {
+          "name": "RenderPass",
+          "enabled": true
+        },
+        {
+          "name": "N8AOPass",
+          "enabled": true
+        },
+        {
+          "name": "UnrealBloomPass",
+          "enabled": true
+        },
+        {
+          "name": "ShaderPass",
+          "enabled": true
+        },
+        {
+          "name": "OutputPass",
+          "enabled": true
+        }
+      ],
+      "bloomWidth": 98,
+      "drawingBuffer": {
+        "w": 390,
+        "h": 700
+      }
+    },
+    "locked": false,
+    "yaw": 0,
+    "lockElement": false,
+    "menuFits": {
+      "left": 16,
+      "right": 374,
+      "top": 147,
+      "bottom": 482,
+      "vw": 390,
+      "vh": 700
+    }
+  },
+  "result": "pass"
+}
