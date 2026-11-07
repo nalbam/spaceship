@@ -9,6 +9,10 @@ const RUN_SPEED = 4.5; // Shift + forward
 const HEAD = 1.85; // capsule top above feet, for ceiling bumps
 const GRAVITY = 13.0;
 const JUMP_SPEED = 4.0;
+const LOOK_RATE = 0.0023; // radians per mouse-movement unit at sensitivity 1
+const DEFAULT_SENSITIVITY = 1;
+const MIN_SENSITIVITY = 0.25;
+const MAX_SENSITIVITY = 3;
 
 export class Player {
   constructor(camera, domElement, colliders) {
@@ -28,6 +32,7 @@ export class Player {
     this.locked = false;
     this.frozen = false; // during interactions/fades
     this.debugCam = false; // screenshot rig takes over
+    this.sensitivity = DEFAULT_SENSITIVITY; // mouse-look multiplier, see setSensitivity
 
     // the #start overlay sits on top of the canvas, so it must request the lock too
     const requestLock = () => {
@@ -41,14 +46,24 @@ export class Player {
     });
     document.addEventListener('mousemove', (e) => {
       if (!this.locked || this.frozen) return;
-      this.yaw -= e.movementX * 0.0023;
-      this.pitch -= e.movementY * 0.0023;
+      const rate = LOOK_RATE * this.sensitivity;
+      this.yaw -= e.movementX * rate;
+      this.pitch -= e.movementY * rate;
       this.pitch = Math.max(-1.45, Math.min(1.45, this.pitch));
     });
     document.addEventListener('keydown', (e) => { this.keys[e.code] = true; });
     document.addEventListener('keyup', (e) => { this.keys[e.code] = false; });
 
     this.applyCamera();
+  }
+
+  // Mouse-look multiplier 0.25..3 (default 1). Finite values outside the range
+  // are clamped; non-numbers and NaN/Infinity fall back to the default.
+  setSensitivity(v) {
+    this.sensitivity = typeof v === 'number' && Number.isFinite(v)
+      ? Math.max(MIN_SENSITIVITY, Math.min(MAX_SENSITIVITY, v))
+      : DEFAULT_SENSITIVITY;
+    return this.sensitivity;
   }
 
   // resolve horizontal circle-vs-AABB for every collider

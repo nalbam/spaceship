@@ -1,12 +1,31 @@
 // Procedural footstep audio — Web Audio only, no assets.
 // Metal deck step = low thump (sine drop) + short metallic tap (bandpassed noise).
+// Every effect connects to `master` (never to ctx.destination directly), so one
+// gain controls the overall volume.
 let ctx = null;
+let master = null;
 let noiseBuf = null;
 let stepCount = 0;
+const DEFAULT_VOLUME = 1;
+let masterVolume = DEFAULT_VOLUME;
+
+// Master volume 0..1 (0 = silent). Finite values outside the range are
+// clamped; non-numbers and NaN/Infinity fall back to the default. Safe to call
+// before the AudioContext exists: the value is kept and applied on creation.
+export function setMasterVolume(v) {
+  masterVolume = typeof v === 'number' && Number.isFinite(v)
+    ? Math.max(0, Math.min(1, v))
+    : DEFAULT_VOLUME;
+  if (master) master.gain.value = masterVolume;
+  return masterVolume;
+}
 
 function ensureCtx() {
   if (!ctx) {
     ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain();
+    master.gain.value = masterVolume;
+    master.connect(ctx.destination);
     const len = Math.floor(ctx.sampleRate * 0.2);
     noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
@@ -28,7 +47,7 @@ export function playFootstep(intensity = 1) {
   const og = c.createGain();
   og.gain.setValueAtTime(0.16 * intensity, t);
   og.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
-  osc.connect(og).connect(c.destination);
+  osc.connect(og).connect(master);
   osc.start(t);
   osc.stop(t + 0.13);
   // metallic tap
@@ -41,7 +60,7 @@ export function playFootstep(intensity = 1) {
   const ng = c.createGain();
   ng.gain.setValueAtTime(0.09 * intensity, t);
   ng.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
-  src.connect(bp).connect(ng).connect(c.destination);
+  src.connect(bp).connect(ng).connect(master);
   src.start(t);
   src.stop(t + 0.09);
 }
@@ -60,7 +79,7 @@ export function playShot() {
     const g = c.createGain();
     g.gain.setValueAtTime(0.11, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
-    osc.connect(g).connect(c.destination);
+    osc.connect(g).connect(master);
     osc.start(t);
     osc.stop(t + 0.18);
   }
@@ -72,7 +91,7 @@ export function playShot() {
   const ng = c.createGain();
   ng.gain.setValueAtTime(0.12, t);
   ng.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
-  src.connect(hp).connect(ng).connect(c.destination);
+  src.connect(hp).connect(ng).connect(master);
   src.start(t);
   src.stop(t + 0.06);
 }
@@ -91,7 +110,7 @@ export function playHit() {
   const ng = c.createGain();
   ng.gain.setValueAtTime(0.1, t);
   ng.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
-  src.connect(bp).connect(ng).connect(c.destination);
+  src.connect(bp).connect(ng).connect(master);
   src.start(t);
   src.stop(t + 0.1);
   const osc = c.createOscillator();
@@ -100,7 +119,7 @@ export function playHit() {
   const og = c.createGain();
   og.gain.setValueAtTime(0.08, t);
   og.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
-  osc.connect(og).connect(c.destination);
+  osc.connect(og).connect(master);
   osc.start(t);
   osc.stop(t + 0.09);
 }
@@ -114,7 +133,7 @@ function mechClick(c, t, gain) {
   const g = c.createGain();
   g.gain.setValueAtTime(gain, t);
   g.gain.exponentialRampToValueAtTime(0.001, t + 0.03);
-  src.connect(hp).connect(g).connect(c.destination);
+  src.connect(hp).connect(g).connect(master);
   src.start(t);
   src.stop(t + 0.04);
 }
