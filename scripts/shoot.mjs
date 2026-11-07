@@ -2,6 +2,7 @@
 // saves PNGs to shots/ for visual judging.
 //   npm run shoot               all scene shots + movement/collision/eat checks
 //   npm run shoot -- settings   focused settings-menu check only (shots/settings/)
+//   npm run shoot -- rooms      HUD room-name check only (shots/rooms/)
 // Set PUPPETEER_EXECUTABLE_PATH to use an already installed Chromium.
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -51,6 +52,19 @@ if (process.argv[2] === 'settings') {
     await runSettingsCheck({ browser, page, url: `http://localhost:${PORT}/spaceship/` });
   } catch (e) {
     console.error('SETTINGS CHECK FAILED:', e.message);
+    code = 1;
+  }
+  await browser.close();
+  killVite();
+  process.exit(code);
+}
+
+if (process.argv[2] === 'rooms') {
+  let code = 0;
+  try {
+    await runRoomsCheck({ page, url: `http://localhost:${PORT}/spaceship/` });
+  } catch (e) {
+    console.error('ROOMS CHECK FAILED:', e.message);
     code = 1;
   }
   await browser.close();
@@ -493,4 +507,172 @@ async function settingsScenario({ browser, page, url }, report) {
 
   check(report.consoleErrors.length === 0, 'no console errors', report.consoleErrors);
   console.log('SETTINGS CHECK PASSED', JSON.stringify({ escReleasedLock: report.escReleasedLock, notes: report.notes }));
+}
+
+// ---- focused HUD room-name check (`npm run shoot -- rooms`) ----
+// Moves the real player (window.__shot.place → player.position, not only the
+// camera) into each room, lets the frame loop update #room, and compares the
+// text with src/rooms.js. Then steps the player through the quarters door and
+// jitters at the cockpit door, and checks that the number of #room DOM writes
+// equals the number of room changes. Checks #room's rect against the other HUD
+// elements at 1280×720 and 390×844 and collects console errors.
+// Evidence: shots/rooms/<nn>_<room>.png, report.json (run.log via tee).
+async function runRoomsCheck(ctx) {
+  const report = { steps: [], consoleErrors: [], notes: [] };
+  try {
+    await roomsScenario(ctx, report);
+    if (report.consoleErrors.length) throw new Error(`console errors: ${report.consoleErrors.length}`);
+    report.result = 'pass';
+  } catch (e) {
+    report.result = 'fail';
+    report.failure = e.message;
+    throw e;
+  } finally {
+    const { writeFileSync } = await import('node:fs');
+    writeFileSync('shots/rooms/report.json', JSON.stringify(report, null, 2));
+  }
+}
+async function roomsScenario({ page, url }, report) {
+  const OUT = 'shots/rooms';
+  mkdirSync(OUT, { recursive: true });
+  const { roomAt, ROOM_NAMES } = await import('../src/rooms.js');
+  const check = (cond, msg, data) => {
+    if (!cond) throw new Error(`${msg}${data === undefined ? '' : ` — ${JSON.stringify(data)}`}`);
+  };
+  page.on('console', (m) => { if (m.type() === 'error') report.consoleErrors.push(m.text()); });
+  page.on('pageerror', (e) => report.consoleErrors.push(`pageerror: ${e.message}`));
+  const frames = () => page.evaluate(() => window.__shot.frames());
+  async function waitFrames(k) {
+    const n0 = await frames();
+    await page.waitForFunction((b, n) => window.__shot.frames() >= b + n, { timeout: 15000, polling: 20 }, n0, k);
+  }
+  const room = () => page.evaluate(() => window.__shot.room());
+
+  // SwiftShader renders the high tier at several seconds per frame; the HUD
+  // check needs many frames, so it runs on the low tier (stored through the
+  // game's own settings key in this fresh headless profile).
+  await page.evaluateOnNewDocument(() => {
+    localStorage.setItem('spaceship.settings.v1', JSON.stringify({ quality: 'low', volume: 1, sensitivity: 1 }));
+  });
+  const t0 = Date.now();
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction('window.__ready === true', { timeout: 30000 });
+  await page.evaluate(() => document.getElementById('start').classList.add('hidden'));
+  await waitFrames(3);
+  report.quality = await page.evaluate(() => window.__shot.settings().applied.quality);
+  check(report.quality === 'low', 'low tier applied', report.quality);
+  const initial = await room();
+  check(initial.id === 'corridor' && initial.dom === 'CORRIDOR' && initial.writes === 1,
+    'start position shows CORRIDOR after one write', initial);
+  report.steps.push({ step: 'start', room: initial, pass: true });
+
+  // 1. each room: real player position, frame-loop update, screenshot
+  const ROOMS = [
+    // [file, expected id, feet x, feet z, yaw, pitch]
+    ['01_corridor', 'corridor', 0, 5.8, 0, 0.02],
+    ['02_cockpit', 'cockpit', 0, -8.4, 0, -0.04],
+    ['03_quarters', 'quarters', 2.0, -0.4, -0.76, -0.1],
+    ['04_galley', 'galley', -2.0, 3.9, 1.02, -0.1],
+    ['05_bathroom', 'bathroom', 1.9, 5.0, -0.89, -0.3],
+  ];
+  let prevId = initial.id;
+  for (const [file, id, x, z, yaw, pitch] of ROOMS) {
+    const before = await room();
+    await page.evaluate((a) => window.__shot.place(...a), [x, z, yaw, pitch]);
+    await waitFrames(2);
+    const pos = await page.evaluate(() => window.__shot.pos());
+    const after = await room();
+    const expectedText = ROOM_NAMES[id];
+    const expectedWrites = before.writes + (id === prevId ? 0 : 1);
+    const step = {
+      step: `room ${id}`, screenshot: `${OUT}/${file}.png`,
+      playerPosition: { x: pos.x, y: pos.y, z: pos.z },
+      expectedText, actualText: after.dom, updaterText: after.text, id: after.id,
+      writesBefore: before.writes, writesAfter: after.writes, expectedWrites,
+    };
+    step.pass = Math.abs(pos.x - x) < 1e-9 && Math.abs(pos.z - z) < 1e-9
+      && after.id === id && after.dom === expectedText && after.text === expectedText
+      && after.writes === expectedWrites;
+    report.steps.push(step);
+    await page.screenshot({ path: `${OUT}/${file}.png` });
+    console.log('room', id, JSON.stringify({ pos: step.playerPosition, text: after.dom, writes: after.writes }));
+    check(step.pass, `room ${id}`, step);
+    prevId = id;
+  }
+
+  // 2. movement sequences: writes must equal room changes (browser and rooms.js agree)
+  async function sequence(name, points) {
+    const start = await room();
+    const ids = [];
+    let expect = start.id, expectedChanges = 0;
+    for (const [x, z] of points) {
+      await page.evaluate((a) => window.__shot.place(a[0], a[1]), [x, z]);
+      await waitFrames(1);
+      const r = await room();
+      ids.push(r.id);
+      const next = roomAt(x, z, expect);
+      if (next !== expect) expectedChanges++;
+      expect = next;
+    }
+    const end = await room();
+    const observedChanges = ids.filter((id, i) => id !== (i ? ids[i - 1] : start.id)).length;
+    const step = {
+      step: name, points, ids, startRoom: start.id, endRoom: end.id, endText: end.dom,
+      writes: end.writes - start.writes, observedChanges, expectedChanges,
+    };
+    step.pass = step.writes === observedChanges && observedChanges === expectedChanges
+      && end.dom === ROOM_NAMES[end.id];
+    report.steps.push(step);
+    console.log('sequence', name, JSON.stringify({ ids, writes: step.writes, observedChanges, expectedChanges }));
+    check(step.pass, name, step);
+    return step;
+  }
+  await page.evaluate(() => window.__shot.place(0, -1.5, -Math.PI / 2, 0));
+  await waitFrames(2);
+  const cross = [];
+  for (let i = 0; i <= 15; i++) cross.push([+(i * 0.2).toFixed(2), -1.5]); // corridor x=0 → quarters x=3
+  for (let i = 14; i >= 0; i -= 2) cross.push([+(i * 0.2).toFixed(2), -1.5]); // and back
+  const s1 = await sequence('walk through the quarters door (x = 1.4) and back', cross);
+  check(s1.expectedChanges === 2, 'door walk has two room changes', s1);
+  const jitter = [-6.5, -6.9, -7.1, -7.25, -6.95, -7.2, -6.8, -7.28, -7.6, -7.1, -6.8, -7.2, -6.75, -6.5]
+    .map((z) => [0, z]);
+  const s2 = await sequence('jitter at the cockpit door (z = -7)', jitter);
+  check(s2.expectedChanges === 2, 'cockpit door jitter changes only when well inside', s2);
+
+  // 3. layout: #room must not overlap the other HUD elements
+  async function layout(w, h) {
+    await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 });
+    await waitFrames(2);
+    const rects = await page.evaluate(() => {
+      const prompt = document.getElementById('prompt');
+      const saved = { display: prompt.style.display, text: prompt.textContent };
+      prompt.style.display = 'block';
+      prompt.textContent = 'E — SLEEP';
+      const r = {};
+      for (const id of ['room', 'status', 'ammo', 'crosshair', 'prompt']) {
+        const b = document.getElementById(id).getBoundingClientRect();
+        r[id] = { left: b.left, top: b.top, right: b.right, bottom: b.bottom };
+      }
+      prompt.style.display = saved.display;
+      prompt.textContent = saved.text;
+      return r;
+    });
+    const hit = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+    const overlaps = ['status', 'ammo', 'crosshair', 'prompt'].filter((id) => hit(rects.room, rects[id]));
+    const r = rects.room;
+    const onScreen = r.left >= 0 && r.top >= 0 && r.right <= w && r.bottom <= h;
+    const step = { step: `layout ${w}x${h}`, rects, overlaps, roomOnScreen: onScreen, pass: overlaps.length === 0 && onScreen };
+    report.steps.push(step);
+    console.log('layout', `${w}x${h}`, JSON.stringify({ room: r, overlaps, onScreen }));
+    check(step.pass, `layout ${w}x${h}`, step);
+  }
+  await layout(1280, 720);
+  await layout(390, 844);
+  await page.setViewport({ width: 1280, height: 720, deviceScaleFactor: 1 });
+
+  report.consoleErrorCount = report.consoleErrors.length;
+  report.seconds = +((Date.now() - t0) / 1000).toFixed(1);
+  report.notes.push('Players are moved with window.__shot.place (sets player.position, releases debug camera); the HUD is updated by the frame loop in src/main.js, not by the rig.');
+  report.fps = await page.evaluate(() => window.__shot.fps());
+  console.log('consoleErrors', report.consoleErrors.length, 'seconds', report.seconds, 'fps', report.fps);
 }

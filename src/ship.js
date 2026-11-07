@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createMaterials, makeConsoleCanvas } from './textures.js';
+import { ROOM_BOUNDS } from './rooms.js';
 
 const WALL_T = 0.15;
 const CEIL_H = 2.6;
@@ -73,7 +74,7 @@ export function buildShip(scene) {
 
   // ============================================================ corridor
   // x in [-1.4, 1.4], z in [-7, 7]
-  const CW = 1.4; // corridor half width
+  const CW = ROOM_BOUNDS.corridor.x1; // corridor half width (1.4)
 
   // floor + ceiling
   slab(0, -0.05, 0, CW * 2, 0.1, 14, M.floor);
@@ -325,7 +326,7 @@ export function buildShip(scene) {
 
   // ============================================================ cockpit
   // x in [-2.6, 2.6], z in [-11.6, -7]
-  const CK = { x0: -2.6, x1: 2.6, z0: -11.6, z1: -7 };
+  const CK = ROOM_BOUNDS.cockpit; // { x0: -2.6, x1: 2.6, z0: -11.6, z1: -7 }
   slab(0, -0.05, -9.3, 5.2, 0.1, 4.6, M.floor);
   slab(0, CEIL_H + 0.05, -9.3, 5.2, 0.1, 4.6, M.hullDark);
   // back wall (door to corridor at center, opening 1.2)
@@ -546,7 +547,7 @@ export function buildShip(scene) {
 
   // ============================================================ crew quarters
   // x in [1.4, 5.4], z in [-3.5, 0.5], door at x=1.4, z=-1.5
-  const Q = { x0: 1.4, x1: 5.4, z0: -3.5, z1: 0.5 };
+  const Q = ROOM_BOUNDS.quarters; // { x0: 1.4, x1: 5.4, z0: -3.5, z1: 0.5 }
   slab(3.4, -0.05, -1.5, 4.0, 0.1, 4.0, M.floor);
   slab(3.4, CEIL_H + 0.05, -1.5, 4.0, 0.1, 4.0, M.hullDark);
   slab(Q.x1 + WALL_T / 2, CEIL_H / 2, -1.5, WALL_T, CEIL_H, 4.0, M.hullWarm);
@@ -674,7 +675,7 @@ export function buildShip(scene) {
 
   // ============================================================ galley
   // x in [-5, -1.4], z in [1, 4.6], door at x=-1.4, z=2.8
-  const G = { x0: -5, x1: -1.4, z0: 1, z1: 4.6 };
+  const G = ROOM_BOUNDS.galley; // { x0: -5, x1: -1.4, z0: 1, z1: 4.6 }
   slab(-3.2, -0.05, 2.8, 3.6, 0.1, 3.6, M.floor);
   slab(-3.2, CEIL_H + 0.05, 2.8, 3.6, 0.1, 3.6, M.hullDark);
   slab(G.x0 - WALL_T / 2, CEIL_H / 2, 2.8, WALL_T, CEIL_H, 3.6, M.hull);
@@ -803,7 +804,7 @@ export function buildShip(scene) {
 
   // ============================================================ bathroom
   // x in [1.4, 3.6], z in [3.4, 5.6], door at x=1.4, z=4.5
-  const B = { x0: 1.4, x1: 3.6, z0: 3.4, z1: 5.6 };
+  const B = ROOM_BOUNDS.bathroom; // { x0: 1.4, x1: 3.6, z0: 3.4, z1: 5.6 }
   slab(2.5, -0.05, 4.5, 2.2, 0.1, 2.2, M.floor);
   slab(2.5, CEIL_H + 0.05, 4.5, 2.2, 0.1, 2.2, M.hullDark);
   slab(B.x1 + WALL_T / 2, CEIL_H / 2, 4.5, WALL_T, CEIL_H, 2.2, M.hullCool);
