@@ -10,9 +10,15 @@ const BASE_RATE = 0.0023; // rotation per movement unit before sensitivity exist
 
 function makeDocument() {
   const listeners = new Map();
-  const start = { classList: { toggle() {} }, addEventListener() {} };
+  const startListeners = [];
+  const start = {
+    classList: { toggle() {} },
+    addEventListener: (type, fn) => { if (type === 'click') startListeners.push(fn); },
+    click: (target) => { for (const fn of startListeners) fn({ target }); },
+  };
   return {
     pointerLockElement: null,
+    start,
     getElementById: (id) => (id === 'start' ? start : null),
     addEventListener: (type, fn) => {
       if (!listeners.has(type)) listeners.set(type, []);
@@ -39,7 +45,7 @@ const move = (movementX, movementY) => doc.dispatch('mousemove', { movementX, mo
 beforeEach(() => {
   doc = makeDocument();
   globalThis.document = doc;
-  canvas = { addEventListener() {}, requestPointerLock() {} };
+  canvas = { lockRequests: 0, addEventListener() {}, requestPointerLock() { this.lockRequests++; } };
   player = new Player(new THREE.PerspectiveCamera(), canvas, []);
 });
 afterEach(() => { delete globalThis.document; });
@@ -100,4 +106,49 @@ test('out-of-range sensitivity clamps and invalid input restores the default', (
     assert.equal(player.setSensitivity(input), want, `setSensitivity(${String(input)})`);
     assert.equal(player.sensitivity, want);
   }
+});
+
+// minimal element stand-in: `closest('[data-no-lock]')` finds itself or an ancestor
+function el(noLock, parent = null) {
+  const node = {
+    closest: (sel) => {
+      if (sel !== '[data-no-lock]') return null;
+      return noLock ? node : (parent?.closest(sel) ?? null);
+    },
+  };
+  return node;
+}
+
+test('start overlay click requests the lock, settings controls do not', () => {
+  const plain = el(false);
+  const menu = el(true);
+  const sliderInMenu = el(false, menu);
+  doc.start.click(plain);
+  assert.equal(canvas.lockRequests, 1);
+  doc.start.click(menu);
+  doc.start.click(sliderInMenu);
+  assert.equal(canvas.lockRequests, 1);
+  // explicit resume path (settings menu "Resume" button)
+  player.requestLock();
+  assert.equal(canvas.lockRequests, 2);
+  // no request while already locked
+  lock();
+  player.requestLock();
+  doc.start.click(plain);
+  assert.equal(canvas.lockRequests, 2);
+});
+
+test('held keys are cleared when the pointer lock changes', () => {
+  lock();
+  doc.dispatch('keydown', { code: 'KeyW' });
+  assert.equal(player.keys.KeyW, true);
+  unlock(); // Esc while holding W; keyup may land in the menu
+  assert.equal(player.keys.KeyW, undefined);
+  doc.dispatch('keydown', { code: 'KeyD' }); // typed while the menu is open
+  lock();
+  assert.equal(player.keys.KeyD, undefined);
+  const z0 = player.position.z, x0 = player.position.x;
+  player.update(0.1);
+  assert.equal(player.position.z, z0);
+  assert.equal(player.position.x, x0);
 });

@@ -34,14 +34,20 @@ export class Player {
     this.debugCam = false; // screenshot rig takes over
     this.sensitivity = DEFAULT_SENSITIVITY; // mouse-look multiplier, see setSensitivity
 
-    // the #start overlay sits on top of the canvas, so it must request the lock too
-    const requestLock = () => {
-      if (!this.locked) domElement.requestPointerLock();
-    };
-    domElement.addEventListener('click', requestLock);
-    document.getElementById('start').addEventListener('click', requestLock);
+    this.domElement = domElement;
+    // the #start overlay sits on top of the canvas, so it must request the lock
+    // too — except for clicks inside a `[data-no-lock]` element (settings menu
+    // and its buttons), which must never grab the pointer.
+    domElement.addEventListener('click', () => this.requestLock());
+    document.getElementById('start').addEventListener('click', (e) => {
+      if (e.target?.closest?.('[data-no-lock]')) return;
+      this.requestLock();
+    });
     document.addEventListener('pointerlockchange', () => {
       this.locked = document.pointerLockElement === domElement;
+      // keys pressed or released while the pointer was free (menu, alt-tab)
+      // must not leave the player walking after the lock changes
+      this.keys = {};
       document.getElementById('start').classList.toggle('hidden', this.locked);
     });
     document.addEventListener('mousemove', (e) => {
@@ -55,6 +61,10 @@ export class Player {
     document.addEventListener('keyup', (e) => { this.keys[e.code] = false; });
 
     this.applyCamera();
+  }
+
+  requestLock() {
+    if (!this.locked) this.domElement.requestPointerLock();
   }
 
   // Mouse-look multiplier 0.25..3 (default 1). Finite values outside the range

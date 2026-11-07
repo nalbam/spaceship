@@ -6,7 +6,8 @@ import { Player } from './player.js';
 import { setupInteractions } from './interact.js';
 import { setupPost } from './post.js';
 import { setupWeapon } from './weapon.js';
-import { audioDebug } from './audio.js';
+import { audioDebug, setMasterVolume } from './audio.js';
+import { getBrowserStorage, loadSettings, saveSettings, normalizeSettings } from './settings.js';
 
 const app = document.getElementById('app');
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
@@ -45,6 +46,106 @@ window.addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
   post.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ---- settings: load before the first frame, apply, wire the menu ----
+const { storage } = getBrowserStorage();
+const loaded = loadSettings(storage);
+let settings = loaded.settings;
+const applied = { volume: settings.volume };
+function applySettings(s) {
+  post.setQuality(s.quality);
+  applied.volume = setMasterVolume(s.volume);
+  player.setSensitivity(s.sensitivity);
+}
+applySettings(settings);
+
+const startEl = document.getElementById('start');
+const settingsEl = document.getElementById('settings');
+const qualityEl = document.getElementById('set-quality');
+const volumeEl = document.getElementById('set-volume');
+const volumeOut = document.getElementById('out-volume');
+const sensEl = document.getElementById('set-sensitivity');
+const sensOut = document.getElementById('out-sensitivity');
+const statusEl = document.getElementById('settings-status');
+const boardBtn = document.getElementById('board');
+const openBtn = document.getElementById('open-settings');
+const closeBtn = document.getElementById('close-settings');
+const resumeBtn = document.getElementById('resume-settings');
+const hintEl = document.getElementById('start-hint');
+const SESSION_ONLY = 'SETTINGS NOT SAVED (STORAGE UNAVAILABLE) — THEY APPLY TO THIS SESSION ONLY';
+
+function setStatus(text, isError) {
+  statusEl.textContent = text;
+  statusEl.classList.toggle('error', !!isError);
+}
+function renderSettings() {
+  qualityEl.value = settings.quality;
+  volumeEl.value = String(Math.round(settings.volume * 100));
+  volumeOut.textContent = `${Math.round(settings.volume * 100)}%`;
+  sensEl.value = String(settings.sensitivity);
+  sensOut.textContent = `${settings.sensitivity.toFixed(2)}×`;
+}
+function updateSetting(patch) {
+  const result = saveSettings(storage, normalizeSettings({ ...settings, ...patch }));
+  settings = result.settings; // applied even when it could not be stored
+  applySettings(settings);
+  renderSettings();
+  if (result.ok) setStatus('SETTINGS SAVED', false);
+  else setStatus(SESSION_ONLY, true);
+}
+renderSettings();
+if (!loaded.ok) setStatus(SESSION_ONLY, true);
+
+qualityEl.addEventListener('change', () => updateSetting({ quality: qualityEl.value }));
+volumeEl.addEventListener('input', () => updateSetting({ volume: Number(volumeEl.value) / 100 }));
+sensEl.addEventListener('input', () => updateSetting({ sensitivity: Number(sensEl.value) }));
+
+function openSettings() {
+  startEl.classList.add('settings-open');
+  startEl.dataset.noLock = ''; // backdrop clicks must not grab the pointer while the menu is open
+  settingsEl.hidden = false;
+  qualityEl.focus();
+}
+function closeSettings({ focus = true } = {}) {
+  startEl.classList.remove('settings-open');
+  delete startEl.dataset.noLock;
+  settingsEl.hidden = true;
+  if (focus) openBtn.focus();
+}
+openBtn.addEventListener('click', openSettings);
+closeBtn.addEventListener('click', () => closeSettings());
+resumeBtn.addEventListener('click', () => player.requestLock());
+// While the start/pause overlay is visible the game is paused: no key may
+// reach the game's document-level handlers (E interact, R reload, WASD),
+// wherever focus is — a menu control, a button, or BODY after a click on the
+// title or backdrop. The listener runs on window in the capture phase, so it
+// sees every key first. stopPropagation does not cancel default actions, so
+// arrow keys on the select/sliders, Tab and Enter/Space on buttons still work.
+// Esc closes the settings menu. The screenshot rig hides the overlay and uses
+// window.__shot directly, so it is not affected.
+for (const type of ['keydown', 'keyup']) {
+  window.addEventListener(type, (e) => {
+    if (startEl.classList.contains('hidden')) return; // playing: keys go to the game
+    e.stopPropagation();
+    if (type === 'keydown' && e.code === 'Escape' && !settingsEl.hidden) {
+      e.preventDefault();
+      closeSettings();
+    }
+  }, true);
+}
+let boarded = false;
+document.addEventListener('pointerlockchange', () => {
+  if (document.pointerLockElement) {
+    boarded = true;
+    closeSettings({ focus: false });
+    document.activeElement?.blur?.();
+  } else if (boarded) {
+    // Esc (or any other unlock) → pause screen with Resume and Settings
+    hintEl.textContent = 'PAUSED — CLICK OR PRESS RESUME TO CONTINUE';
+    boardBtn.textContent = 'RESUME';
+    resumeBtn.textContent = 'RESUME';
+  }
 });
 
 const clock = new THREE.Clock();
@@ -112,5 +213,34 @@ window.__shot = {
     return { meshes, lights, tris: Math.round(tris) };
   },
   info() { return renderer.info.render; },
+  // menu value shown vs. state actually applied to post / audio / Player
+  settings() {
+    const passes = post.composer.passes;
+    const bloomPass = passes.find((p) => p.constructor.name === 'UnrealBloomPass');
+    return {
+      ui: {
+        open: !settingsEl.hidden,
+        quality: qualityEl.value,
+        volume: volumeEl.value,
+        volumeText: volumeOut.textContent,
+        sensitivity: sensEl.value,
+        sensitivityText: sensOut.textContent,
+        status: statusEl.textContent,
+        statusError: statusEl.classList.contains('error'),
+      },
+      applied: {
+        quality: post.getQuality(),
+        volume: applied.volume,
+        sensitivity: player.sensitivity,
+        pixelRatio: renderer.getPixelRatio(),
+        // n8ao ships a mangled class name; its pass is the one with `configuration`
+        passes: passes.map((p) => ({ name: p.configuration ? 'N8AOPass' : p.constructor.name, enabled: p.enabled })),
+        bloomWidth: bloomPass?.renderTargetsHorizontal?.[0]?.width ?? null,
+        drawingBuffer: { w: renderer.domElement.width, h: renderer.domElement.height },
+      },
+      locked: player.locked,
+      yaw: player.yaw,
+    };
+  },
 };
 window.__ready = true;
