@@ -1,0 +1,402 @@
+{
+  "steps": [
+    {
+      "step": "start",
+      "room": {
+        "id": "corridor",
+        "text": "CORRIDOR",
+        "dom": "CORRIDOR",
+        "writes": 1
+      },
+      "pass": true
+    },
+    {
+      "step": "room corridor",
+      "screenshot": "shots/rooms/01_corridor.png",
+      "playerPosition": {
+        "x": 0,
+        "y": 0,
+        "z": 5.8
+      },
+      "expectedText": "CORRIDOR",
+      "actualText": "CORRIDOR",
+      "updaterText": "CORRIDOR",
+      "id": "corridor",
+      "writesBefore": 1,
+      "writesAfter": 1,
+      "expectedWrites": 1,
+      "pass": true
+    },
+    {
+      "step": "room cockpit",
+      "screenshot": "shots/rooms/02_cockpit.png",
+      "playerPosition": {
+        "x": 0,
+        "y": 0,
+        "z": -8.4
+      },
+      "expectedText": "COCKPIT",
+      "actualText": "COCKPIT",
+      "updaterText": "COCKPIT",
+      "id": "cockpit",
+      "writesBefore": 1,
+      "writesAfter": 2,
+      "expectedWrites": 2,
+      "pass": true
+    },
+    {
+      "step": "room quarters",
+      "screenshot": "shots/rooms/03_quarters.png",
+      "playerPosition": {
+        "x": 2,
+        "y": 0,
+        "z": -0.4
+      },
+      "expectedText": "QUARTERS",
+      "actualText": "QUARTERS",
+      "updaterText": "QUARTERS",
+      "id": "quarters",
+      "writesBefore": 2,
+      "writesAfter": 3,
+      "expectedWrites": 3,
+      "pass": true
+    },
+    {
+      "step": "room galley",
+      "screenshot": "shots/rooms/04_galley.png",
+      "playerPosition": {
+        "x": -2,
+        "y": 0,
+        "z": 3.9
+      },
+      "expectedText": "GALLEY",
+      "actualText": "GALLEY",
+      "updaterText": "GALLEY",
+      "id": "galley",
+      "writesBefore": 3,
+      "writesAfter": 4,
+      "expectedWrites": 4,
+      "pass": true
+    },
+    {
+      "step": "room bathroom",
+      "screenshot": "shots/rooms/05_bathroom.png",
+      "playerPosition": {
+        "x": 1.9,
+        "y": 0,
+        "z": 5
+      },
+      "expectedText": "BATHROOM",
+      "actualText": "BATHROOM",
+      "updaterText": "BATHROOM",
+      "id": "bathroom",
+      "writesBefore": 4,
+      "writesAfter": 5,
+      "expectedWrites": 5,
+      "pass": true
+    },
+    {
+      "step": "walk through the quarters door (x = 1.4) and back",
+      "points": [
+        [
+          0,
+          -1.5
+        ],
+        [
+          0.2,
+          -1.5
+        ],
+        [
+          0.4,
+          -1.5
+        ],
+        [
+          0.6,
+          -1.5
+        ],
+        [
+          0.8,
+          -1.5
+        ],
+        [
+          1,
+          -1.5
+        ],
+        [
+          1.2,
+          -1.5
+        ],
+        [
+          1.4,
+          -1.5
+        ],
+        [
+          1.6,
+          -1.5
+        ],
+        [
+          1.8,
+          -1.5
+        ],
+        [
+          2,
+          -1.5
+        ],
+        [
+          2.2,
+          -1.5
+        ],
+        [
+          2.4,
+          -1.5
+        ],
+        [
+          2.6,
+          -1.5
+        ],
+        [
+          2.8,
+          -1.5
+        ],
+        [
+          3,
+          -1.5
+        ],
+        [
+          2.8,
+          -1.5
+        ],
+        [
+          2.4,
+          -1.5
+        ],
+        [
+          2,
+          -1.5
+        ],
+        [
+          1.6,
+          -1.5
+        ],
+        [
+          1.2,
+          -1.5
+        ],
+        [
+          0.8,
+          -1.5
+        ],
+        [
+          0.4,
+          -1.5
+        ],
+        [
+          0,
+          -1.5
+        ]
+      ],
+      "ids": [
+        "corridor",
+        "corridor",
+        "corridor",
+        "corridor",
+        "corridor",
+        "corridor",
+        "corridor",
+        "corridor",
+        "corridor",
+        "quarters",
+        "quarters",
+        "quarters",
+        "quarters",
+        "quarters",
+        "quarters",
+        "quarters",
+        "quarters",
+        "quarters",
+        "quarters",
+        "quarters",
+        "quarters",
+        "corridor",
+        "corridor",
+        "corridor"
+      ],
+      "startRoom": "corridor",
+      "endRoom": "corridor",
+      "endText": "CORRIDOR",
+      "writes": 2,
+      "observedChanges": 2,
+      "expectedChanges": 2,
+      "pass": true
+    },
+    {
+      "step": "jitter at the cockpit door (z = -7)",
+      "points": [
+        [
+          0,
+          -6.5
+        ],
+        [
+          0,
+          -6.9
+        ],
+        [
+          0,
+          -7.1
+        ],
+        [
+          0,
+          -7.25
+        ],
+        [
+          0,
+          -6.95
+        ],
+        [
+          0,
+          -7.2
+        ],
+        [
+          0,
+          -6.8
+        ],
+        [
+          0,
+          -7.28
+        ],
+        [
+          0,
+          -7.6
+        ],
+        [
+          0,
+          -7.1
+        ],
+        [
+          0,
+          -6.8
+        ],
+        [
+          0,
+          -7.2
+        ],
+        [
+          0,
+          -6.75
+        ],
+        [
+          0,
+          -6.5
+        ]
+      ],
+      "ids": [
+        "corridor",
+        "corridor",
+        "corridor",
+        "corridor",
+        "corridor",
+        "corridor",
+        "corridor",
+        "corridor",
+        "cockpit",
+        "cockpit",
+        "cockpit",
+        "cockpit",
+        "cockpit",
+        "corridor"
+      ],
+      "startRoom": "corridor",
+      "endRoom": "corridor",
+      "endText": "CORRIDOR",
+      "writes": 2,
+      "observedChanges": 2,
+      "expectedChanges": 2,
+      "pass": true
+    },
+    {
+      "step": "layout 1280x720",
+      "rects": {
+        "room": {
+          "left": 28,
+          "top": 24,
+          "right": 146.703125,
+          "bottom": 53
+        },
+        "status": {
+          "left": 439.1640625,
+          "top": 665,
+          "right": 840.8359375,
+          "bottom": 694
+        },
+        "ammo": {
+          "left": 1079.59375,
+          "top": 664,
+          "right": 1252,
+          "bottom": 694
+        },
+        "crosshair": {
+          "left": 637,
+          "top": 357,
+          "right": 643,
+          "bottom": 363
+        },
+        "prompt": {
+          "left": 583.890625,
+          "top": 403.1875,
+          "right": 696.109375,
+          "bottom": 436.1875
+        }
+      },
+      "overlaps": [],
+      "roomOnScreen": true,
+      "pass": true
+    },
+    {
+      "step": "layout 390x844",
+      "rects": {
+        "room": {
+          "left": 28,
+          "top": 24,
+          "right": 146.703125,
+          "bottom": 53
+        },
+        "status": {
+          "left": -5.8359375,
+          "top": 789,
+          "right": 395.8359375,
+          "bottom": 818
+        },
+        "ammo": {
+          "left": 189.59375,
+          "top": 788,
+          "right": 362,
+          "bottom": 818
+        },
+        "crosshair": {
+          "left": 192,
+          "top": 419,
+          "right": 198,
+          "bottom": 425
+        },
+        "prompt": {
+          "left": 138.890625,
+          "top": 472.625,
+          "right": 251.109375,
+          "bottom": 505.625
+        }
+      },
+      "overlaps": [],
+      "roomOnScreen": true,
+      "pass": true
+    }
+  ],
+  "consoleErrors": [],
+  "notes": [
+    "Players are moved with window.__shot.place (sets player.position, releases debug camera); the HUD is updated by the frame loop in src/main.js, not by the rig."
+  ],
+  "quality": "low",
+  "consoleErrorCount": 0,
+  "seconds": 115.8,
+  "fps": 10.935480664081666,
+  "result": "pass"
+}

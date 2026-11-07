@@ -8,6 +8,7 @@ import { setupPost } from './post.js';
 import { setupWeapon } from './weapon.js';
 import { audioDebug, setMasterVolume } from './audio.js';
 import { getBrowserStorage, loadSettings, saveSettings, normalizeSettings } from './settings.js';
+import { createRoomHud } from './rooms.js';
 
 const app = document.getElementById('app');
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
@@ -40,6 +41,8 @@ const interactions = setupInteractions({
 });
 const weapon = setupWeapon({ scene, camera, player, targetGroup: ship.group });
 const post = setupPost(renderer, scene, camera);
+// HUD room name: follows player.position (feet), writes the DOM only on a change
+const roomHud = createRoomHud(document.getElementById('room'));
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -155,6 +158,7 @@ function tick() {
   const dt = Math.min(clock.getDelta(), 0.1);
   const elapsed = clock.elapsedTime;
   player.update(dt);
+  roomHud.update(player.position.x, player.position.z);
   ship.update(dt, elapsed);
   space.update(dt, elapsed);
   interactions.update(dt);
@@ -179,6 +183,22 @@ window.__shot = {
   fire() { weapon.fire(); },
   aim(v) { weapon.setAiming(v); },
   reload() { weapon.reload(); },
+  // current HUD room: id, text the updater wrote, text in the DOM, DOM writes so far
+  room() {
+    return { id: roomHud.room, text: roomHud.text, dom: document.getElementById('room').textContent, writes: roomHud.writes };
+  },
+  // move the real player (feet) and hand control back to it, unlike set()
+  // which only moves the camera; the next frame updates the HUD room
+  place(x, z, yaw = player.yaw, pitch = player.pitch) {
+    player.position.set(x, 0, z);
+    player.velY = 0;
+    player.grounded = true;
+    player.yaw = yaw;
+    player.pitch = pitch;
+    player.releaseDebug();
+    player.applyCamera();
+    return { x: player.position.x, y: player.position.y, z: player.position.z };
+  },
   pos() { return { x: player.position.x, y: player.position.y, z: player.position.z, grounded: player.grounded, running: player.running, fov: +camera.fov.toFixed(1) }; },
   probe() { return ship.probe(); },
   // collision smoke test: march the player capsule and return where it stopped
