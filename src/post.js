@@ -13,6 +13,10 @@ const GrainVignetteShader = {
     time: { value: 0 },
     grain: { value: 0.045 },
     vignette: { value: 0.42 },
+    // N8AOPass sRGB-encodes its output (n8ao gammaCorrection, default true),
+    // so the rest of the chain works on encoded colour. When N8AO is off
+    // (`low`), this pass applies the same encoding to keep the brightness.
+    encodeSRGB: { value: false },
   },
   vertexShader: /* glsl */`
     varying vec2 vUv;
@@ -23,12 +27,14 @@ const GrainVignetteShader = {
   fragmentShader: /* glsl */`
     uniform sampler2D tDiffuse;
     uniform float time, grain, vignette;
+    uniform bool encodeSRGB;
     varying vec2 vUv;
     float hash(vec2 p) {
       return fract(sin(dot(p, vec2(127.1, 311.7)) + time * 43.7) * 43758.5453);
     }
     void main() {
       vec4 col = texture2D(tDiffuse, vUv);
+      if (encodeSRGB) col = sRGBTransferOETF(col);
       // split toning: teal shadows, warm highlights — coheres the palette
       float lum = dot(col.rgb, vec3(0.299, 0.587, 0.114));
       col.rgb *= mix(vec3(0.93, 1.02, 1.06), vec3(1.05, 1.0, 0.94), smoothstep(0.12, 0.65, lum));
@@ -43,9 +49,24 @@ const GrainVignetteShader = {
     }`,
 };
 
+// Quality tiers. `high` is the original look; `medium` trims AO samples and
+// renders bloom into a smaller target; `low` skips AO and bloom entirely,
+// moves N8AO's sRGB encoding into the grain pass and drops the renderer to
+// 1 device pixel per CSS pixel.
+export const QUALITY_LEVELS = Object.freeze(['low', 'medium', 'high']);
+export const QUALITY_PRESETS = Object.freeze({
+  high: Object.freeze({ ao: true, aoMode: 'Medium', bloom: true, bloomScale: 1, nativePixelRatio: true }),
+  medium: Object.freeze({ ao: true, aoMode: 'Performance', bloom: true, bloomScale: 0.5, nativePixelRatio: true }),
+  low: Object.freeze({ ao: false, aoMode: 'Performance', bloom: false, bloomScale: 0.5, nativePixelRatio: false }),
+});
+
 export function setupPost(renderer, scene, camera) {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.88;
+
+  // pixel ratio the caller chose (main.js: min(devicePixelRatio, 1.75));
+  // restored whenever a tier other than `low` is selected
+  const nativePixelRatio = renderer.getPixelRatio();
 
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
@@ -67,10 +88,44 @@ export function setupPost(renderer, scene, camera) {
 
   composer.addPass(new OutputPass());
 
+  let quality = 'high';
+  let width = size.x;
+  let height = size.y;
+
+  // Single sizing path for both resize and tier changes. composer.setSize
+  // resizes every pass to width*height*pixelRatio, so the bloom reduction is
+  // applied after it and survives later resizes.
+  function applySize() {
+    const preset = QUALITY_PRESETS[quality];
+    const pr = preset.nativePixelRatio ? nativePixelRatio : 1;
+    if (renderer.getPixelRatio() !== pr) renderer.setPixelRatio(pr);
+    composer.setPixelRatio(pr); // stores the ratio, then resizes with the old size
+    composer.setSize(width, height);
+    const scale = preset.bloomScale;
+    bloom.setSize(Math.max(1, Math.round(width * pr * scale)), Math.max(1, Math.round(height * pr * scale)));
+  }
+
   function setSize(w, h) {
-    composer.setSize(w, h);
-    n8ao.setSize(w, h);
-    bloom.setSize(w, h);
+    width = w;
+    height = h;
+    applySize();
+  }
+
+  function setQuality(level) {
+    if (!QUALITY_LEVELS.includes(level)) {
+      throw new RangeError(`setQuality: unknown level "${level}" (expected ${QUALITY_LEVELS.join(' | ')})`);
+    }
+    quality = level;
+    const preset = QUALITY_PRESETS[level];
+    n8ao.enabled = preset.ao;
+    if (preset.ao) n8ao.setQualityMode(preset.aoMode);
+    bloom.enabled = preset.bloom;
+    grainPass.uniforms.encodeSRGB.value = !preset.ao;
+    applySize();
+  }
+
+  function getQuality() {
+    return quality;
   }
 
   function render(dt) {
@@ -78,5 +133,5 @@ export function setupPost(renderer, scene, camera) {
     composer.render(dt);
   }
 
-  return { composer, setSize, render };
+  return { composer, setSize, setQuality, getQuality, render };
 }
