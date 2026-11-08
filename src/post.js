@@ -1,4 +1,10 @@
-// Post chain: N8AO → bloom → vignette/grain shader → output (ACES on renderer).
+// Post chain: RenderPass → N8AO → bloom → vignette/grain shader → output
+// (ACES on renderer). Only one pass draws the scene per frame: N8AOPass renders
+// the scene into its own beauty target (configuration.autoRenderBeauty, the
+// default) and does not read the composer's readBuffer, so on the AO tiers
+// (`medium`, `high`) the RenderPass is disabled; on `low` (no AO) the
+// RenderPass draws the scene. RenderPass has needsSwap = false, so disabling
+// it does not change the composer's buffer swaps.
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -51,8 +57,9 @@ const GrainVignetteShader = {
 
 // Quality tiers. `high` is the original look; `medium` trims AO samples and
 // renders bloom into a smaller target; `low` skips AO and bloom entirely,
-// moves N8AO's sRGB encoding into the grain pass and drops the renderer to
-// 1 device pixel per CSS pixel.
+// draws the scene with the RenderPass instead of N8AO, moves N8AO's sRGB
+// encoding into the grain pass and drops the renderer to 1 device pixel per
+// CSS pixel.
 export const QUALITY_LEVELS = Object.freeze(['low', 'medium', 'high']);
 export const QUALITY_PRESETS = Object.freeze({
   high: Object.freeze({ ao: true, aoMode: 'Medium', bloom: true, bloomScale: 1, nativePixelRatio: true }),
@@ -69,7 +76,10 @@ export function setupPost(renderer, scene, camera) {
   const nativePixelRatio = renderer.getPixelRatio();
 
   const composer = new EffectComposer(renderer);
-  composer.addPass(new RenderPass(scene, camera));
+  // scene render for tiers without AO; disabled while N8AO renders the scene
+  const renderPass = new RenderPass(scene, camera);
+  renderPass.enabled = !QUALITY_PRESETS.high.ao;
+  composer.addPass(renderPass);
 
   const size = renderer.getSize(new THREE.Vector2());
   const n8ao = new N8AOPass(scene, camera, size.x, size.y);
@@ -118,6 +128,7 @@ export function setupPost(renderer, scene, camera) {
     quality = level;
     const preset = QUALITY_PRESETS[level];
     n8ao.enabled = preset.ao;
+    renderPass.enabled = !preset.ao; // N8AO renders the scene itself (autoRenderBeauty)
     if (preset.ao) n8ao.setQualityMode(preset.aoMode);
     bloom.enabled = preset.bloom;
     grainPass.uniforms.encodeSRGB.value = !preset.ao;

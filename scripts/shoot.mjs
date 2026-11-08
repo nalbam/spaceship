@@ -3,6 +3,9 @@
 //   npm run shoot               all scene shots + movement/collision/eat checks
 //   npm run shoot -- settings   focused settings-menu check only (shots/settings/)
 //   npm run shoot -- rooms      HUD room-name check only (shots/rooms/)
+//   npm run shoot -- perf before|after|compare
+//                               render cost + deterministic frames per tier × room
+//                               (shots/perf/<label>/), compare → shots/perf/report.json
 // Set PUPPETEER_EXECUTABLE_PATH to use an already installed Chromium.
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -30,15 +33,13 @@ await new Promise((res, rej) => {
   });
 });
 
-const browser = await puppeteer.launch({
-  headless: true,
-  args: [
-    '--no-sandbox',
-    '--enable-unsafe-swiftshader',
-    '--use-angle=swiftshader',
-    '--disable-dev-shm-usage',
-  ],
-});
+const CHROME_ARGS = [
+  '--no-sandbox',
+  '--enable-unsafe-swiftshader',
+  '--use-angle=swiftshader',
+  '--disable-dev-shm-usage',
+];
+const browser = await puppeteer.launch({ headless: true, args: CHROME_ARGS });
 const page = await browser.newPage();
 await page.setViewport({ width: 1280, height: 720, deviceScaleFactor: 1 });
 page.on('console', (m) => {
@@ -52,6 +53,19 @@ if (process.argv[2] === 'settings') {
     await runSettingsCheck({ browser, page, url: `http://localhost:${PORT}/spaceship/` });
   } catch (e) {
     console.error('SETTINGS CHECK FAILED:', e.message);
+    code = 1;
+  }
+  await browser.close();
+  killVite();
+  process.exit(code);
+}
+
+if (process.argv[2] === 'perf') {
+  let code = 0;
+  try {
+    await runPerf({ browser, page, url: `http://localhost:${PORT}/spaceship/`, label: process.argv[3] });
+  } catch (e) {
+    console.error('PERF FAILED:', e.message);
     code = 1;
   }
   await browser.close();
@@ -263,6 +277,8 @@ async function settingsScenario({ browser, page, url }, report) {
     if (s.masterGain !== null) check(Math.abs(s.masterGain - want.volume) < 1e-6, 'master GainNode value', s.masterGain);
     const tier = { high: [true, true], medium: [true, true], low: [false, false] }[want.quality];
     check(passOn(s, 'N8AOPass') === tier[0] && passOn(s, 'UnrealBloomPass') === tier[1], 'AO/bloom passes', s.applied.passes);
+    // one scene render per frame: RenderPass only when N8AO (which renders the scene itself) is off
+    check(passOn(s, 'RenderPass') === !tier[0], 'RenderPass enabled === !AO', s.applied.passes);
     if (want.quality === 'low') check(s.applied.pixelRatio === 1, 'low pixel ratio', s.applied);
     if (stored) check(JSON.stringify(JSON.parse(s.stored)) === JSON.stringify(want), 'localStorage value', s.stored);
   };
@@ -675,4 +691,260 @@ async function roomsScenario({ page, url }, report) {
   report.notes.push('Players are moved with window.__shot.place (sets player.position, releases debug camera); the HUD is updated by the frame loop in src/main.js, not by the rig.');
   report.fps = await page.evaluate(() => window.__shot.fps());
   console.log('consoleErrors', report.consoleErrors.length, 'seconds', report.seconds, 'fps', report.fps);
+}
+
+// ---- render cost before/after (`npm run shoot -- perf before|after|compare`) ----
+// before/after: one page load at 480×270 (deviceScaleFactor 1). Records the
+// pass chain of each tier, the collider boxes, the collision walks and, with
+// the frame loop paused, one deterministic frame per tier × room
+// (window.__shot.capture: fixed clock, flicker, star drift, film grain off
+// so the PNGs stay small and compare exactly): the
+// draw calls/triangles of the whole composer.render and the canvas PNG.
+// Then the bed/stove/bathroom interactions on the low tier.
+// Output: shots/perf/<label>/<tier>_<room>.png and result.json.
+// compare: reads both result.json files, compares the PNGs pixel by pixel in
+// a browser canvas (no extra dependency), writes shots/perf/report.json and
+// shots/perf/diff/<tier>_<room>.png for frames that differ.
+// Frame times are not recorded: SwiftShader is a CPU renderer.
+async function runPerf({ browser, page, url, label }) {
+  const PERF_TIERS = ['low', 'medium', 'high'];
+  const PERF_ROOMS = [ // same feet positions/yaw/pitch as the rooms check, eye height 1.7
+    ['corridor', 0, 5.8, 0, 0.02],
+    ['cockpit', 0, -8.4, 0, -0.04],
+    ['quarters', 2.0, -0.4, -0.76, -0.1],
+    ['galley', -2.0, 3.9, 1.02, -0.1],
+    ['bathroom', 1.9, 5.0, -0.89, -0.3],
+  ];
+  const PERF_VIEWPORT = { width: 480, height: 270, deviceScaleFactor: 1 };
+  const { writeFileSync, readFileSync, existsSync } = await import('node:fs');
+  const { execSync } = await import('node:child_process');
+  const ROOT = 'shots/perf';
+  if (label === 'compare') return perfCompare({ browser, page, ROOT, writeFileSync, readFileSync, existsSync });
+  if (label !== 'before' && label !== 'after') throw new Error('usage: npm run shoot -- perf before|after|compare');
+  const OUT = `${ROOT}/${label}`;
+  mkdirSync(OUT, { recursive: true });
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const rev = (() => { try { return execSync('git rev-parse --short HEAD').toString().trim(); } catch { return null; } })();
+  const dirty = (() => { try { return execSync('git status --porcelain src').toString().trim().split('\n').filter(Boolean); } catch { return null; } })();
+  const result = {
+    label, revision: rev, dirtySrc: dirty, chrome: await browser.version(), chromeArgs: CHROME_ARGS,
+    viewport: PERF_VIEWPORT, consoleErrors: [], passes: {}, frames: {},
+  };
+  page.on('console', (m) => { if (m.type() === 'error') result.consoleErrors.push(m.text()); });
+  page.on('pageerror', (e) => result.consoleErrors.push(`pageerror: ${e.message}`));
+  async function waitFrames(k) {
+    const n0 = await page.evaluate(() => window.__shot.frames());
+    const t0 = Date.now();
+    while (await page.evaluate(() => window.__shot.frames()) <= n0 + k) {
+      if (Date.now() - t0 > 60000) throw new Error('frame loop stalled');
+      await page.screenshot({ type: 'jpeg', quality: 10 }); // headless may idle rAF
+    }
+  }
+  await page.setViewport(PERF_VIEWPORT);
+  // start on the low tier so the warm-up frames are fast
+  await page.evaluateOnNewDocument(() => {
+    localStorage.setItem('spaceship.settings.v1', JSON.stringify({ quality: 'low', volume: 1, sensitivity: 1 }));
+  });
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  await page.waitForFunction('window.__ready === true', { timeout: 30000 });
+  await page.evaluate(() => document.getElementById('start').classList.add('hidden'));
+  await waitFrames(3);
+
+  // pass chain per tier, in an order that also repeats a tier
+  for (const tier of ['high', 'low', 'medium', 'medium', 'high', 'low']) {
+    const passes = await page.evaluate((t) => { window.__shot.quality(t); return window.__shot.settings().applied.passes; }, tier);
+    result.passes[tier] = passes;
+    console.log('PASSES', tier, JSON.stringify(passes));
+  }
+  result.colliders = await page.evaluate(() => window.__shot.colliders());
+  console.log('COLLIDERS', result.colliders.length);
+  result.collision = await page.evaluate(() => ({ a: window.__shot.walk(0, 0, 0.05, 0, 60), b: window.__shot.walk(0, 5, 0, 0.05, 80) }));
+  console.log('COLLISION', JSON.stringify(result.collision));
+  result.sceneStats = await page.evaluate(() => window.__shot.stats());
+  console.log('SCENE', JSON.stringify(result.sceneStats));
+
+  // deterministic frames: loop paused, one render per tier × room
+  await page.evaluate(() => window.__shot.pause(true));
+  for (const tier of PERF_TIERS) {
+    await page.evaluate((t) => window.__shot.quality(t), tier);
+    for (const [room, x, z, yaw, pitch] of PERF_ROOMS) {
+      const { info, png } = await page.evaluate((a) => {
+        window.__shot.set(a[0], 1.7, a[1], a[2], a[3]);
+        return window.__shot.capture(18, 0, 0); // grain off: small, exact PNGs
+      }, [x, z, yaw, pitch]);
+      const file = `${OUT}/${tier}_${room}.png`;
+      writeFileSync(file, await compactPng(Buffer.from(png.split(',')[1], 'base64')));
+      result.frames[`${tier}_${room}`] = { ...info, png: file };
+      console.log('FRAME', tier, room, JSON.stringify(info));
+    }
+  }
+
+  // interactions on the low tier with the loop running again
+  await page.evaluate(() => { window.__shot.quality('low'); window.__shot.pause(false); });
+  const dom = () => page.evaluate(() => ({
+    prompt: document.getElementById('prompt').textContent,
+    promptShown: document.getElementById('prompt').style.display !== 'none',
+    message: document.getElementById('message').textContent,
+    status: document.getElementById('status').textContent,
+  }));
+  const energy = (st) => Number(/(\d+)\s*%/.exec(st)?.[1] ?? NaN);
+  async function aim(pose) {
+    await page.evaluate((p) => window.__shot.set(...p), pose);
+    await waitFrames(3);
+    const hover = await page.evaluate(() => ({ ray: window.__shot.ray(), idbg: window.__shot.idbg().hovered }));
+    return { ...hover, ray: hover.ray.map((r) => r && r.label), ...(await dom()) };
+  }
+  async function press(waitMs, until) {
+    await page.evaluate(() => document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyE' })));
+    if (until) await page.waitForFunction(until, { timeout: 15000, polling: 50 });
+    else await sleep(waitMs);
+    return dom();
+  }
+  const idle = () => page.waitForFunction(() => !window.__shot.idbg().busy, { timeout: 20000, polling: 100 });
+  const it = {};
+  // stove cooktop (-4.6, 0.99, 1.9) from 1.2 m
+  it.eat = { hover: await aim([-3.4, 1.7, 1.9, Math.PI / 2, -0.5]) };
+  it.eat.after = await press(700);
+  it.eat.energyBefore = energy(it.eat.hover.status);
+  it.eat.energyAfter = energy(it.eat.after.status);
+  it.eat.statusChanged = it.eat.after.status !== it.eat.hover.status;
+  await idle();
+  // bathroom sink (3.3, 0.85, 4.0) from 1 m
+  it.refresh = { hover: await aim([2.3, 1.7, 4.0, -Math.PI / 2, -0.75]) };
+  it.refresh.after = await press(0, () => /REFRESHED/.test(document.getElementById('message').textContent));
+  await idle();
+  // bed (same pose as the full rig's prompt shot)
+  it.sleep = { hover: await aim([3.0, 1.7, -1.4, -0.67, -0.5]) };
+  it.sleep.after = await press(0, () => /HOURS PASS/.test(document.getElementById('message').textContent));
+  it.sleep.energyAfter = energy(it.sleep.after.status);
+  result.interactions = it;
+  console.log('INTERACT', JSON.stringify(it));
+  writeFileSync(`${OUT}/result.json`, JSON.stringify(result, null, 2));
+  console.log('PERF', label, 'done', JSON.stringify({ revision: rev, dirtySrc: dirty, consoleErrors: result.consoleErrors.length }));
+  if (result.consoleErrors.length) throw new Error(`console errors: ${JSON.stringify(result.consoleErrors)}`);
+}
+
+// Lossless PNG re-encoder for the perf evidence: Chrome's toDataURL PNG uses
+// fast compression and keeps an opaque alpha channel. Re-encode as 8-bit RGB
+// (when alpha is all 255), Paeth filter, zlib level 9 — same pixels, ~40 %
+// fewer bytes, so the 30 before/after frames stay small in the repository.
+async function compactPng(buf) {
+  const zlib = await import('node:zlib');
+  let i = 8, ihdr = null; const idat = [];
+  while (i < buf.length) {
+    const n = buf.readUInt32BE(i), t = buf.toString('latin1', i + 4, i + 8);
+    if (t === 'IHDR') ihdr = buf.subarray(i + 8, i + 8 + n);
+    else if (t === 'IDAT') idat.push(buf.subarray(i + 8, i + 8 + n));
+    i += 12 + n;
+  }
+  const w = ihdr.readUInt32BE(0), h = ihdr.readUInt32BE(4);
+  if (ihdr[8] !== 8 || ihdr[12] !== 0 || (ihdr[9] !== 6 && ihdr[9] !== 2)) return buf; // only 8-bit RGB(A), non-interlaced
+  const bpp = ihdr[9] === 6 ? 4 : 3, st = w * bpp, raw = zlib.inflateSync(Buffer.concat(idat));
+  const px = Buffer.alloc(h * st);
+  const paeth = (a, b, c) => { const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c); return pa <= pb && pa <= pc ? a : pb <= pc ? b : c; };
+  for (let y = 0; y < h; y++) {
+    const f = raw[y * (st + 1)], src = y * (st + 1) + 1, o = y * st;
+    for (let x = 0; x < st; x++) {
+      const a = x >= bpp ? px[o + x - bpp] : 0, b = y ? px[o - st + x] : 0, c = x >= bpp && y ? px[o - st + x - bpp] : 0;
+      const v = raw[src + x];
+      px[o + x] = (f === 0 ? v : f === 1 ? v + a : f === 2 ? v + b : f === 3 ? v + ((a + b) >> 1) : v + paeth(a, b, c)) & 255;
+    }
+  }
+  let opaque = bpp === 4;
+  for (let k = 3; opaque && k < px.length; k += 4) if (px[k] !== 255) opaque = false;
+  const nb = opaque ? 3 : bpp, ost = w * nb, out = Buffer.alloc(h * (ost + 1));
+  const at = (y, x) => (opaque ? px[y * st + Math.floor(x / 3) * 4 + (x % 3)] : px[y * st + x]);
+  for (let y = 0; y < h; y++) {
+    const o = y * (ost + 1); out[o] = 4;
+    for (let x = 0; x < ost; x++) {
+      const a = x >= nb ? at(y, x - nb) : 0, b = y ? at(y - 1, x) : 0, c = x >= nb && y ? at(y - 1, x - nb) : 0;
+      out[o + 1 + x] = (at(y, x) - paeth(a, b, c)) & 255;
+    }
+  }
+  const crcTable = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+  const crc = (b) => { let c = 0xffffffff; for (const v of b) c = crcTable[(c ^ v) & 255] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+  const chunk = (t, d) => { const tb = Buffer.concat([Buffer.from(t, 'latin1'), d]); const l = Buffer.alloc(4); l.writeUInt32BE(d.length); const c = Buffer.alloc(4); c.writeUInt32BE(crc(tb)); return Buffer.concat([l, tb, c]); };
+  const hd = Buffer.alloc(13); hd.writeUInt32BE(w, 0); hd.writeUInt32BE(h, 4); hd[8] = 8; hd[9] = opaque ? 2 : 6;
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', hd), chunk('IDAT', zlib.deflateSync(out, { level: 9 })), chunk('IEND', Buffer.alloc(0))]);
+}
+
+async function perfCompare({ page, ROOT, writeFileSync, readFileSync, existsSync }) {
+  const load = (l) => {
+    const f = `${ROOT}/${l}/result.json`;
+    if (!existsSync(f)) throw new Error(`missing ${f}: run perf ${l} first`);
+    return JSON.parse(readFileSync(f, 'utf8'));
+  };
+  const before = load('before'), after = load('after');
+  mkdirSync(`${ROOT}/diff`, { recursive: true });
+  await page.goto('about:blank');
+  const frames = {};
+  for (const key of Object.keys(before.frames)) {
+    const b = before.frames[key], a = after.frames[key];
+    const toUrl = (f) => `data:image/png;base64,${readFileSync(f).toString('base64')}`;
+    const px = await page.evaluate(async (ua, ub) => {
+      const img = async (u) => { const i = new Image(); i.src = u; await i.decode(); return i; };
+      const [ia, ib] = await Promise.all([img(ua), img(ub)]);
+      const w = ia.width, h = ia.height;
+      if (ib.width !== w || ib.height !== h) return { sizeMismatch: [w, h, ib.width, ib.height] };
+      const data = (i) => { const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.drawImage(i, 0, 0); return x.getImageData(0, 0, w, h).data; };
+      const da = data(ia), db = data(ib);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d'); const out = x.createImageData(w, h);
+      let diffPixels = 0, maxChannelDiff = 0;
+      for (let i = 0; i < da.length; i += 4) {
+        let m = 0;
+        for (let k = 0; k < 3; k++) m = Math.max(m, Math.abs(da[i + k] - db[i + k]));
+        if (m > 0) diffPixels++;
+        if (m > maxChannelDiff) maxChannelDiff = m;
+        // diff image: dim, posterised grey copy of before (small PNG), changed
+        // pixels in red (brightness = size)
+        const g = Math.round((da[i] + da[i + 1] + da[i + 2]) / 72) * 8;
+        out.data[i] = m ? Math.min(255, 96 + m * 8) : g; out.data[i + 1] = m ? 0 : g; out.data[i + 2] = m ? 0 : g; out.data[i + 3] = 255;
+      }
+      x.putImageData(out, 0, 0);
+      return { w, h, diffPixels, maxChannelDiff, diffPng: diffPixels ? c.toDataURL('image/png') : null };
+    }, toUrl(b.png), toUrl(a.png));
+    const entry = {
+      before: { calls: b.calls, triangles: b.triangles, points: b.points, lines: b.lines },
+      after: { calls: a.calls, triangles: a.triangles, points: a.points, lines: a.lines },
+      deltaCalls: a.calls - b.calls, deltaTriangles: a.triangles - b.triangles,
+      pixels: { total: px.w * px.h, diffPixels: px.diffPixels, maxChannelDiff: px.maxChannelDiff, sizeMismatch: px.sizeMismatch },
+    };
+    if (px.diffPng) {
+      entry.pixels.diffImage = `${ROOT}/diff/${key}.png`;
+      writeFileSync(entry.pixels.diffImage, await compactPng(Buffer.from(px.diffPng.split(',')[1], 'base64')));
+    }
+    frames[key] = entry;
+    console.log('COMPARE', key, JSON.stringify({ calls: [b.calls, a.calls], tris: [b.triangles, a.triangles], diffPixels: px.diffPixels, maxChannelDiff: px.maxChannelDiff }));
+  }
+  const same = (x, y) => JSON.stringify(x) === JSON.stringify(y);
+  const strip = (it) => JSON.parse(JSON.stringify(it, (k, v) => (k === 'status' || k === 'statusChanged' || k === 'energyBefore' || k === 'energyAfter' ? undefined : v)));
+  const report = {
+    baseRevision: '38b6b27',
+    before: { revision: before.revision, dirtySrc: before.dirtySrc, chrome: before.chrome },
+    after: { revision: after.revision, dirtySrc: after.dirtySrc, chrome: after.chrome },
+    chromeArgs: after.chromeArgs, viewport: after.viewport,
+    passes: { before: before.passes, after: after.passes },
+    colliders: { count: [before.colliders.length, after.colliders.length], identical: same(before.colliders, after.colliders), before: before.colliders, after: after.colliders },
+    collision: { before: before.collision, after: after.collision, identical: same(before.collision, after.collision) },
+    interactions: {
+      before: before.interactions, after: after.interactions,
+      // HUD clock/energy text depends on wall time; compare labels, prompts,
+      // messages, that eat changed the status, and the energy after eating
+      identical: same(strip(before.interactions), strip(after.interactions))
+        && before.interactions.eat.energyAfter === after.interactions.eat.energyAfter
+        && before.interactions.eat.statusChanged === after.interactions.eat.statusChanged,
+    },
+    sceneStats: { before: before.sceneStats, after: after.sceneStats },
+    consoleErrors: { before: before.consoleErrors, after: after.consoleErrors },
+    frames,
+  };
+  writeFileSync(`${ROOT}/report.json`, JSON.stringify(report, null, 2));
+  console.log('SUMMARY', JSON.stringify({ colliders: report.colliders.identical, collision: report.collision.identical, interactions: report.interactions.identical }));
+  console.log('| tier | room | calls before | calls after | Δ | tris before | tris after | Δ | diff px | max ch |');
+  console.log('|---|---|---:|---:|---:|---:|---:|---:|---:|---:|');
+  for (const [k, e] of Object.entries(frames)) {
+    const [tier, room] = k.split('_');
+    console.log(`| ${tier} | ${room} | ${e.before.calls} | ${e.after.calls} | ${e.deltaCalls} | ${e.before.triangles} | ${e.after.triangles} | ${e.deltaTriangles} | ${e.pixels.diffPixels} | ${e.pixels.maxChannelDiff} |`);
+  }
 }

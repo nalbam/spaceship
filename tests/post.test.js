@@ -32,13 +32,16 @@ function setup(width, height, pixelRatio) {
   const passes = post.composer.passes;
   const n8ao = passes.find((p) => p instanceof N8AOPass);
   const bloom = passes.find((p) => p instanceof UnrealBloomPass);
-  return { renderer, post, passes, n8ao, bloom };
+  const renderPass = passes.find((p) => p instanceof RenderPass);
+  return { renderer, post, passes, n8ao, bloom, renderPass };
 }
 
 // observable state of the chain for one tier
-function snapshot({ renderer, post, passes, n8ao, bloom }) {
+function snapshot({ renderer, post, passes, n8ao, bloom, renderPass }) {
   return {
     passCount: passes.length,
+    renderPassEnabled: renderPass.enabled,
+    autoRenderBeauty: n8ao.configuration.autoRenderBeauty,
     rendererPR: renderer.getPixelRatio(),
     composerPR: post.composer.getPixelRatio?.() ?? post.composer._pixelRatio,
     target: [post.composer.renderTarget1.width, post.composer.renderTarget1.height],
@@ -64,6 +67,9 @@ test('default tier is high and keeps the original chain and settings', () => {
   assert.deepEqual([bloom.strength, bloom.radius, bloom.threshold], [0.38, 0.5, 1.0]);
   const s = snapshot(ctx);
   assert.equal(s.aoEnabled, true);
+  // N8AO draws the scene itself on the AO tiers; the RenderPass would be discarded
+  assert.equal(s.renderPassEnabled, false);
+  assert.equal(s.autoRenderBeauty, true);
   assert.equal(s.aoSamples, 16);
   assert.equal(s.aoDenoiseSamples, 8);
   assert.equal(s.aoHalfRes, true);
@@ -73,6 +79,7 @@ test('default tier is high and keeps the original chain and settings', () => {
   // existing setSize(w, h) callers keep working
   post.setSize(1000, 500);
   const r = snapshot(ctx);
+  assert.equal(r.renderPassEnabled, false);
   assert.deepEqual(r.target, [1500, 750]);
   assert.deepEqual(r.bloomBright, [750, 375]);
   assert.deepEqual(r.aoTarget, [1500, 750]);
@@ -95,6 +102,9 @@ for (const dpr of [1, 1.75]) {
       const s = snapshot(ctx);
       const msg = `${level} ${w}x${h}`;
       assert.equal(s.passCount, 5, msg);
+      // exactly one pass renders the scene: RenderPass without AO, N8AO with it
+      assert.equal(s.renderPassEnabled, !s.aoEnabled, msg);
+      assert.equal(s.autoRenderBeauty, true, msg);
       if (level === 'low') {
         assert.equal(s.rendererPR, 1, msg);
         assert.equal(s.composerPR, 1, msg);
@@ -126,6 +136,25 @@ for (const dpr of [1, 1.75]) {
     assert.deepEqual(snapshot(ctx), high);
   });
 }
+
+test('RenderPass is on only for low across tier switches, repeats and resizes', () => {
+  const ctx = setup(800, 600, 1.25);
+  const { post, passes, renderPass, n8ao } = ctx;
+  const order = [RenderPass, N8AOPass, UnrealBloomPass, ShaderPass, OutputPass];
+  const want = { low: true, medium: false, high: false };
+  assert.equal(renderPass.enabled, false, 'default high');
+  const seq = ['high', 'low', 'medium', 'high', 'low', 'low', 'medium', 'medium', 'high', 'high'];
+  seq.forEach((level, i) => {
+    post.setQuality(level);
+    assert.equal(renderPass.enabled, want[level], `${level} (step ${i})`);
+    post.setSize(640 + i * 10, 360);
+    assert.equal(renderPass.enabled, want[level], `${level} after setSize (step ${i})`);
+    assert.equal(n8ao.enabled, !want[level], `${level} N8AO`);
+    assert.equal(n8ao.configuration.autoRenderBeauty, true, `${level} autoRenderBeauty`);
+    assert.equal(passes.length, 5);
+    order.forEach((Cls, k) => assert.ok(passes[k] instanceof Cls, `${level}: pass ${k} is ${Cls.name}`));
+  });
+});
 
 test('selecting the same tier repeatedly does not add passes or change sizes', () => {
   const ctx = setup(640, 480, 2);

@@ -2,7 +2,7 @@
 > spaceship@1.0.0 shoot
 > node scripts/shoot.mjs rooms
 
-10:03:38 PM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+8:33:52 AM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
 room corridor {"pos":{"x":0,"y":0,"z":5.8},"text":"CORRIDOR","writes":1}
 room cockpit {"pos":{"x":0,"y":0,"z":-8.4},"text":"COCKPIT","writes":2}
 room quarters {"pos":{"x":2,"y":0,"z":-0.4},"text":"QUARTERS","writes":3}
@@ -10,6 +10,6 @@ room galley {"pos":{"x":-2,"y":0,"z":3.9},"text":"GALLEY","writes":4}
 room bathroom {"pos":{"x":1.9,"y":0,"z":5},"text":"BATHROOM","writes":5}
 sequence walk through the quarters door (x = 1.4) and back {"ids":["corridor","corridor","corridor","corridor","corridor","corridor","corridor","corridor","corridor","quarters","quarters","quarters","quarters","quarters","quarters","quarters","quarters","quarters","quarters","quarters","quarters","corridor","corridor","corridor"],"writes":2,"observedChanges":2,"expectedChanges":2}
 sequence jitter at the cockpit door (z = -7) {"ids":["corridor","corridor","corridor","corridor","corridor","corridor","corridor","corridor","cockpit","cockpit","cockpit","cockpit","cockpit","corridor"],"writes":2,"observedChanges":2,"expectedChanges":2}
-layout 1280x720 {"room":{"left":28,"top":24,"right":146.703125,"bottom":53},"overlaps":[],"onScreen":true}
-layout 390x844 {"room":{"left":28,"top":24,"right":146.703125,"bottom":53},"overlaps":[],"onScreen":true}
-consoleErrors 0 seconds 115.8 fps 10.935480664081666
+layout 1280x720 {"room":{"left":28,"top":24,"right":144.421875,"bottom":49},"overlaps":[],"onScreen":true}
+layout 390x844 {"room":{"left":28,"top":24,"right":144.421875,"bottom":49},"overlaps":[],"onScreen":true}
+consoleErrors 0 seconds 216.2 fps 10.888932884577814
