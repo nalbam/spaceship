@@ -152,14 +152,18 @@ export function buildSpace(scene) {
   const ptex = new THREE.CanvasTexture(planetCanvas(9));
   ptex.colorSpace = THREE.SRGBColorSpace;
   ptex.anisotropy = 4;
+  // 32×24 segments (was 48×32): the outline stays round in the 1280×720 cockpit
+  // window view; 24×16 showed straight limb segments (shots/planet-segments/REPORT.md)
   const planet = new THREE.Mesh(
-    new THREE.SphereGeometry(260, 48, 32),
+    new THREE.SphereGeometry(260, 32, 24),
     new THREE.MeshStandardMaterial({ map: ptex, roughness: 1, metalness: 0, fog: false }),
   );
   planetGroup.add(planet);
   // atmosphere: backside fresnel shell, additive
+  // same 32×24 as the planet: the rim uses interpolated vertex normals, so the
+  // shell keeps the planet's silhouette without visible facets or rim steps
   const atmo = new THREE.Mesh(
-    new THREE.SphereGeometry(272, 48, 32),
+    new THREE.SphereGeometry(272, 32, 24),
     new THREE.ShaderMaterial({
       transparent: true, blending: THREE.AdditiveBlending, side: THREE.BackSide,
       depthWrite: false, fog: false,

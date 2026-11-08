@@ -79,6 +79,7 @@ npm run shoot -- rooms     # HUD room-name check only, writes shots/rooms/
 npm run shoot -- perf before   # render cost + deterministic frames, writes shots/perf/before/
 npm run shoot -- perf after    # same after a change, writes shots/perf/after/
 npm run shoot -- perf compare  # compares both, writes shots/perf/report.json and shots/perf/diff/
+npm run shoot -- perf before shots/planet-segments  # optional 3rd argument: output folder (default shots/perf)
 ```
 
 Puppeteer uses its own downloaded Chrome. To use an installed Chromium
@@ -133,12 +134,20 @@ stores the draw calls and triangles of the whole `composer.render` and the
 canvas PNG, re-encoded losslessly (RGB, Paeth, zlib 9) to keep the files small. Last, on `low`,
 it aims at the stove, the bathroom sink and the bed and records the ray and
 hover labels, the prompt and the E result (eat status, `REFRESHED.`,
-`8 HOURS PASS`). Output: `shots/perf/<label>/<tier>_<room>.png` and
+`8 HOURS PASS`). Each tier also gets a `cockpit_window` frame (the full
+rig's `03_cockpit_window` pose `(0, 1.7, -9.6, 0, 0.06)` with
+`__shot.capture(70, 0, 0)`, planet in front of the window). At the end the
+same view is rendered once at 1280×720 on `high`; the planet limb and
+atmosphere rim area is cropped and scaled 3× (nearest neighbour) to
+`<label>/zoom_cockpit_window.png`, to judge faceted outlines. Output: `shots/perf/<label>/<tier>_<room>.png` and
 `shots/perf/<label>/result.json`. `perf compare` compares the two PNG sets in
 a browser canvas (no extra dependency) and writes `shots/perf/report.json`
 (calls/triangles before/after, differing pixels and maximum channel
 difference per frame, passes, collider/collision/interaction equality) and,
-only for frames that differ, `shots/perf/diff/<tier>_<room>.png`.
+only for frames that differ, `shots/perf/diff/<tier>_<room>.png` (the zoom
+is compared as `zoom_cockpit_window`). With an output folder argument, all
+paths are under that folder, `compare` writes a diff image for every frame
+(also identical ones) and `baseRevision` comes from the before result.
 Save the output with `2>&1 | tee -a shots/perf/run.log`; the summary of the
 last measurement is `shots/perf/REPORT.md`. Frame times are not recorded:
 SwiftShader is a CPU renderer, so real-GPU timing must be checked on a device.

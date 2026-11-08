@@ -3,9 +3,10 @@
 //   npm run shoot               all scene shots + movement/collision/eat checks
 //   npm run shoot -- settings   focused settings-menu check only (shots/settings/)
 //   npm run shoot -- rooms      HUD room-name check only (shots/rooms/)
-//   npm run shoot -- perf before|after|compare
+//   npm run shoot -- perf before|after|compare [dir]
 //                               render cost + deterministic frames per tier × room
-//                               (shots/perf/<label>/), compare → shots/perf/report.json
+//                               (<dir>/<label>/, dir defaults to shots/perf),
+//                               compare → <dir>/report.json
 // Set PUPPETEER_EXECUTABLE_PATH to use an already installed Chromium.
 import { spawn } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
@@ -63,7 +64,7 @@ if (process.argv[2] === 'settings') {
 if (process.argv[2] === 'perf') {
   let code = 0;
   try {
-    await runPerf({ browser, page, url: `http://localhost:${PORT}/spaceship/`, label: process.argv[3] });
+    await runPerf({ browser, page, url: `http://localhost:${PORT}/spaceship/`, label: process.argv[3], root: process.argv[4] });
   } catch (e) {
     console.error('PERF FAILED:', e.message);
     code = 1;
@@ -715,12 +716,24 @@ async function roomsScenario({ page, url }, report) {
 // so the PNGs stay small and compare exactly): the
 // draw calls/triangles of the whole composer.render and the canvas PNG.
 // Then the bed/stove/bathroom interactions on the low tier.
-// Output: shots/perf/<label>/<tier>_<room>.png and result.json.
+// Each tier also gets a cockpit_window frame (the full rig's 03_cockpit_window
+// pose at elapsed 70, planet in front of the window). At the end, the same
+// view is rendered once at 1280×720 on the high tier; the planet limb +
+// atmosphere rim area is cropped and scaled ZOOM.scale× (nearest neighbour)
+// to <label>/zoom_cockpit_window.png, so a faceted outline is visible.
+// Output: <root>/<label>/<tier>_<room>.png and result.json
+// (root = optional 3rd argument, default shots/perf).
 // compare: reads both result.json files, compares the PNGs pixel by pixel in
-// a browser canvas (no extra dependency), writes shots/perf/report.json and
-// shots/perf/diff/<tier>_<room>.png for frames that differ.
+// a browser canvas (no extra dependency), writes <root>/report.json and
+// <root>/diff/<key>.png for frames that differ (for every frame when root is
+// not the default, so a reviewer can open all of them).
 // Frame times are not recorded: SwiftShader is a CPU renderer.
-async function runPerf({ browser, page, url, label }) {
+async function runPerf({ browser, page, url, label, root }) {
+  const PERF_DEFAULT_ROOT = 'shots/perf';
+  // cockpit window view: full rig 03_cockpit_window pose and space time
+  const PERF_WINDOW = { pose: [0, 1.7, -9.6, 0, 0.06], elapsed: 70 };
+  // 1280×720 crop around the planet's upper-left limb and atmosphere rim
+  const ZOOM = { width: 1280, height: 720, x: 330, y: 270, w: 260, h: 200, scale: 3 };
   const PERF_TIERS = ['low', 'medium', 'high'];
   const PERF_ROOMS = [ // same feet positions/yaw/pitch as the rooms check, eye height 1.7
     ['corridor', 0, 5.8, 0, 0.02],
@@ -732,16 +745,16 @@ async function runPerf({ browser, page, url, label }) {
   const PERF_VIEWPORT = { width: 480, height: 270, deviceScaleFactor: 1 };
   const { writeFileSync, readFileSync, existsSync } = await import('node:fs');
   const { execSync } = await import('node:child_process');
-  const ROOT = 'shots/perf';
-  if (label === 'compare') return perfCompare({ browser, page, ROOT, writeFileSync, readFileSync, existsSync });
-  if (label !== 'before' && label !== 'after') throw new Error('usage: npm run shoot -- perf before|after|compare');
+  const ROOT = (root || PERF_DEFAULT_ROOT).replace(/\/+$/, '');
+  if (label === 'compare') return perfCompare({ browser, page, ROOT, writeFileSync, readFileSync, existsSync, diffAll: ROOT !== PERF_DEFAULT_ROOT });
+  if (label !== 'before' && label !== 'after') throw new Error('usage: npm run shoot -- perf before|after|compare [dir]');
   const OUT = `${ROOT}/${label}`;
   mkdirSync(OUT, { recursive: true });
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const rev = (() => { try { return execSync('git rev-parse --short HEAD').toString().trim(); } catch { return null; } })();
   const dirty = (() => { try { return execSync('git status --porcelain src').toString().trim().split('\n').filter(Boolean); } catch { return null; } })();
   const result = {
-    label, revision: rev, dirtySrc: dirty, chrome: await browser.version(), chromeArgs: CHROME_ARGS,
+    label, revision: rev, dirtySrc: dirty, chrome: await browser.version(), executable: process.env.PUPPETEER_EXECUTABLE_PATH || null, chromeArgs: CHROME_ARGS,
     viewport: PERF_VIEWPORT, consoleErrors: [], passes: {}, frames: {},
   };
   page.on('console', (m) => { if (m.type() === 'error') result.consoleErrors.push(m.text()); });
@@ -791,6 +804,14 @@ async function runPerf({ browser, page, url, label }) {
       result.frames[`${tier}_${room}`] = { ...info, png: file };
       console.log('FRAME', tier, room, JSON.stringify(info));
     }
+    const { info, png } = await page.evaluate((w) => {
+      window.__shot.set(...w.pose);
+      return window.__shot.capture(w.elapsed, 0, 0);
+    }, PERF_WINDOW);
+    const file = `${OUT}/${tier}_cockpit_window.png`;
+    writeFileSync(file, await compactPng(Buffer.from(png.split(',')[1], 'base64')));
+    result.frames[`${tier}_cockpit_window`] = { ...info, png: file };
+    console.log('FRAME', tier, 'cockpit_window', JSON.stringify(info));
   }
 
   // interactions on the low tier with the loop running again
@@ -833,6 +854,26 @@ async function runPerf({ browser, page, url, label }) {
   it.sleep.energyAfter = energy(it.sleep.after.status);
   result.interactions = it;
   console.log('INTERACT', JSON.stringify(it));
+
+  // zoomed cockpit window view at play resolution, high tier, loop paused
+  await page.evaluate(() => { window.__shot.pause(true); window.__shot.quality('high'); });
+  await page.setViewport({ width: ZOOM.width, height: ZOOM.height, deviceScaleFactor: 1 });
+  // the resize handler in src/main.js resizes renderer + composer
+  await page.waitForFunction((w, h) => [...document.querySelectorAll('canvas')].some((c) => c.width === w && c.height === h), {}, ZOOM.width, ZOOM.height);
+  const zoom = await page.evaluate(async (w, z) => {
+    window.__shot.set(...w.pose);
+    const { info, png } = window.__shot.capture(w.elapsed, 0, 0);
+    const i = new Image(); i.src = png; await i.decode();
+    const c = document.createElement('canvas'); c.width = z.w * z.scale; c.height = z.h * z.scale;
+    const x = c.getContext('2d'); x.imageSmoothingEnabled = false;
+    x.drawImage(i, z.x, z.y, z.w, z.h, 0, 0, c.width, c.height);
+    return { info, size: [i.width, i.height], full: png, png: c.toDataURL('image/png') };
+  }, PERF_WINDOW, ZOOM);
+  if (process.env.PERF_ZOOM_FULL) writeFileSync(process.env.PERF_ZOOM_FULL, Buffer.from(zoom.full.split(',')[1], 'base64'));
+  const zfile = `${OUT}/zoom_cockpit_window.png`;
+  writeFileSync(zfile, await compactPng(Buffer.from(zoom.png.split(',')[1], 'base64')));
+  result.zoom = { ...zoom.info, render: zoom.size, crop: ZOOM, elapsed: PERF_WINDOW.elapsed, pose: PERF_WINDOW.pose, tier: 'high', png: zfile };
+  console.log('ZOOM', JSON.stringify(result.zoom));
   writeFileSync(`${OUT}/result.json`, JSON.stringify(result, null, 2));
   console.log('PERF', label, 'done', JSON.stringify({ revision: rev, dirtySrc: dirty, consoleErrors: result.consoleErrors.length }));
   if (result.consoleErrors.length) throw new Error(`console errors: ${JSON.stringify(result.consoleErrors)}`);
@@ -882,7 +923,7 @@ async function compactPng(buf) {
   return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', hd), chunk('IDAT', zlib.deflateSync(out, { level: 9 })), chunk('IEND', Buffer.alloc(0))]);
 }
 
-async function perfCompare({ page, ROOT, writeFileSync, readFileSync, existsSync }) {
+async function perfCompare({ page, ROOT, writeFileSync, readFileSync, existsSync, diffAll }) {
   const load = (l) => {
     const f = `${ROOT}/${l}/result.json`;
     if (!existsSync(f)) throw new Error(`missing ${f}: run perf ${l} first`);
@@ -892,10 +933,12 @@ async function perfCompare({ page, ROOT, writeFileSync, readFileSync, existsSync
   mkdirSync(`${ROOT}/diff`, { recursive: true });
   await page.goto('about:blank');
   const frames = {};
-  for (const key of Object.keys(before.frames)) {
-    const b = before.frames[key], a = after.frames[key];
+  const pairs = Object.keys(before.frames).filter((k) => after.frames[k]).map((k) => [k, before.frames[k], after.frames[k]]);
+  const missing = [...Object.keys(before.frames), ...Object.keys(after.frames)].filter((k) => !before.frames[k] || !after.frames[k]);
+  if (before.zoom && after.zoom) pairs.push(['zoom_cockpit_window', before.zoom, after.zoom]);
+  for (const [key, b, a] of pairs) {
     const toUrl = (f) => `data:image/png;base64,${readFileSync(f).toString('base64')}`;
-    const px = await page.evaluate(async (ua, ub) => {
+    const px = await page.evaluate(async (ua, ub, diffAll) => {
       const img = async (u) => { const i = new Image(); i.src = u; await i.decode(); return i; };
       const [ia, ib] = await Promise.all([img(ua), img(ub)]);
       const w = ia.width, h = ia.height;
@@ -916,8 +959,8 @@ async function perfCompare({ page, ROOT, writeFileSync, readFileSync, existsSync
         out.data[i] = m ? Math.min(255, 96 + m * 8) : g; out.data[i + 1] = m ? 0 : g; out.data[i + 2] = m ? 0 : g; out.data[i + 3] = 255;
       }
       x.putImageData(out, 0, 0);
-      return { w, h, diffPixels, maxChannelDiff, diffPng: diffPixels ? c.toDataURL('image/png') : null };
-    }, toUrl(b.png), toUrl(a.png));
+      return { w, h, diffPixels, maxChannelDiff, diffPng: diffPixels || diffAll ? c.toDataURL('image/png') : null };
+    }, toUrl(b.png), toUrl(a.png), diffAll);
     const entry = {
       before: { calls: b.calls, triangles: b.triangles, points: b.points, lines: b.lines },
       after: { calls: a.calls, triangles: a.triangles, points: a.points, lines: a.lines },
@@ -934,9 +977,11 @@ async function perfCompare({ page, ROOT, writeFileSync, readFileSync, existsSync
   const same = (x, y) => JSON.stringify(x) === JSON.stringify(y);
   const strip = (it) => JSON.parse(JSON.stringify(it, (k, v) => (k === 'status' || k === 'statusChanged' || k === 'energyBefore' || k === 'energyAfter' ? undefined : v)));
   const report = {
-    baseRevision: '38b6b27',
-    before: { revision: before.revision, dirtySrc: before.dirtySrc, chrome: before.chrome },
-    after: { revision: after.revision, dirtySrc: after.dirtySrc, chrome: after.chrome },
+    baseRevision: before.revision,
+    root: ROOT, missingFrames: missing,
+    before: { revision: before.revision, dirtySrc: before.dirtySrc, chrome: before.chrome, chromeArgs: before.chromeArgs, viewport: before.viewport, zoom: before.zoom && { render: before.zoom.render, crop: before.zoom.crop } },
+    after: { revision: after.revision, dirtySrc: after.dirtySrc, chrome: after.chrome, chromeArgs: after.chromeArgs, viewport: after.viewport, zoom: after.zoom && { render: after.zoom.render, crop: after.zoom.crop } },
+    sameBrowser: before.chrome === after.chrome && before.executable === after.executable && same(before.chromeArgs, after.chromeArgs) && same(before.viewport, after.viewport),
     chromeArgs: after.chromeArgs, viewport: after.viewport,
     passes: { before: before.passes, after: after.passes },
     colliders: { count: [before.colliders.length, after.colliders.length], identical: same(before.colliders, after.colliders), before: before.colliders, after: after.colliders },
@@ -958,7 +1003,7 @@ async function perfCompare({ page, ROOT, writeFileSync, readFileSync, existsSync
   console.log('| tier | room | calls before | calls after | Δ | tris before | tris after | Δ | diff px | max ch |');
   console.log('|---|---|---:|---:|---:|---:|---:|---:|---:|---:|');
   for (const [k, e] of Object.entries(frames)) {
-    const [tier, room] = k.split('_');
+    const tier = k.slice(0, k.indexOf('_')), room = k.slice(k.indexOf('_') + 1);
     console.log(`| ${tier} | ${room} | ${e.before.calls} | ${e.after.calls} | ${e.deltaCalls} | ${e.before.triangles} | ${e.after.triangles} | ${e.deltaTriangles} | ${e.pixels.diffPixels} | ${e.pixels.maxChannelDiff} |`);
   }
 }

@@ -1,0 +1,200 @@
+$ PUPPETEER_EXECUTABLE_PATH=~/.cache/ms-playwright/chromium_headless_shell-1254/chrome-headless-shell-linux-arm64/chrome-headless-shell npm run shoot -- perf before shots/planet-segments   # src/space.js at 200b89e
+
+> spaceship@1.0.0 shoot
+> node scripts/shoot.mjs perf before shots/planet-segments
+
+11:16:29 AM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+PASSES high [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES low [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":false},{"name":"UnrealBloomPass","enabled":false},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES medium [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES medium [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES high [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES low [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":false},{"name":"UnrealBloomPass","enabled":false},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+COLLIDERS 58
+COLLISION {"a":{"x":1.0799999999999998,"z":0},"b":{"x":0,"z":6.68}}
+SCENE {"meshes":188,"lights":13,"tris":17251}
+FRAME low corridor {"calls":160,"triangles":8780,"points":4360,"lines":0}
+FRAME low cockpit {"calls":57,"triangles":1408,"points":4360,"lines":0}
+FRAME low quarters {"calls":82,"triangles":10374,"points":4360,"lines":0}
+FRAME low galley {"calls":70,"triangles":5476,"points":4360,"lines":0}
+FRAME low bathroom {"calls":94,"triangles":10662,"points":4360,"lines":0}
+FRAME low cockpit_window {"calls":39,"triangles":7140,"points":4360,"lines":0}
+FRAME medium corridor {"calls":195,"triangles":8909,"points":8720,"lines":0}
+FRAME medium cockpit {"calls":88,"triangles":1441,"points":8720,"lines":0}
+FRAME medium quarters {"calls":113,"triangles":13381,"points":8720,"lines":0}
+FRAME medium galley {"calls":100,"triangles":5507,"points":8720,"lines":0}
+FRAME medium bathroom {"calls":123,"triangles":13665,"points":8720,"lines":0}
+FRAME medium cockpit_window {"calls":71,"triangles":10149,"points":8720,"lines":0}
+FRAME high corridor {"calls":195,"triangles":8909,"points":8720,"lines":0}
+FRAME high cockpit {"calls":88,"triangles":1441,"points":8720,"lines":0}
+FRAME high quarters {"calls":113,"triangles":13381,"points":8720,"lines":0}
+FRAME high galley {"calls":100,"triangles":5507,"points":8720,"lines":0}
+FRAME high bathroom {"calls":123,"triangles":13665,"points":8720,"lines":0}
+FRAME high cockpit_window {"calls":71,"triangles":10149,"points":8720,"lines":0}
+INTERACT {"eat":{"hover":{"ray":[null,"E: Eat",null],"idbg":"E: Eat","prompt":"E: Eat","promptShown":true,"message":"","status":"SHIP TIME 08:00 · ENERGY 86% · CRUISE 0.42c"},"after":{"prompt":"E: Eat","promptShown":false,"message":"YOU EAT. ENERGY RESTORED.","status":"SHIP TIME 08:21 · ENERGY 100% · CRUISE 0.42c"},"energyBefore":86,"energyAfter":100,"statusChanged":true},"refresh":{"hover":{"ray":[null,null,"E: Freshen Up"],"idbg":"E: Freshen Up","prompt":"E: Freshen Up","promptShown":true,"message":"YOU EAT. ENERGY RESTORED.","status":"SHIP TIME 08:22 · ENERGY 100% · CRUISE 0.42c"},"after":{"prompt":"E: Freshen Up","promptShown":false,"message":"REFRESHED.","status":"SHIP TIME 08:32 · ENERGY 100% · CRUISE 0.42c"}},"sleep":{"hover":{"ray":["E: Sleep",null,null],"idbg":"E: Sleep","prompt":"E: Sleep","promptShown":true,"message":"REFRESHED.","status":"SHIP TIME 08:34 · ENERGY 100% · CRUISE 0.42c"},"after":{"prompt":"E: Sleep","promptShown":false,"message":"8 HOURS PASS","status":"SHIP TIME 16:34 · ENERGY 100% · CRUISE 0.42c"},"energyAfter":100}}
+ZOOM {"calls":71,"triangles":10149,"points":8720,"lines":0,"render":[1280,720],"crop":{"width":1280,"height":720,"x":330,"y":270,"w":260,"h":200,"scale":3},"elapsed":70,"pose":[0,1.7,-9.6,0,0.06],"tier":"high","png":"shots/planet-segments/before/zoom_cockpit_window.png"}
+PERF before done {"revision":"200b89e","dirtySrc":[],"consoleErrors":0}
+$ PUPPETEER_EXECUTABLE_PATH=…/chrome-headless-shell npm run shoot -- perf after shots/planet-segments   # src/space.js planet+atmosphere 24×16
+
+> spaceship@1.0.0 shoot
+> node scripts/shoot.mjs perf after shots/planet-segments
+
+11:17:39 AM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+PASSES high [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES low [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":false},{"name":"UnrealBloomPass","enabled":false},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES medium [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES medium [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES high [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES low [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":false},{"name":"UnrealBloomPass","enabled":false},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+COLLIDERS 58
+COLLISION {"a":{"x":1.0799999999999998,"z":0},"b":{"x":0,"z":6.68}}
+SCENE {"meshes":188,"lights":13,"tris":12739}
+FRAME low corridor {"calls":160,"triangles":8780,"points":4360,"lines":0}
+FRAME low cockpit {"calls":57,"triangles":1408,"points":4360,"lines":0}
+FRAME low quarters {"calls":82,"triangles":5862,"points":4360,"lines":0}
+FRAME low galley {"calls":70,"triangles":5476,"points":4360,"lines":0}
+FRAME low bathroom {"calls":94,"triangles":6150,"points":4360,"lines":0}
+FRAME low cockpit_window {"calls":39,"triangles":2628,"points":4360,"lines":0}
+FRAME medium corridor {"calls":195,"triangles":8909,"points":8720,"lines":0}
+FRAME medium cockpit {"calls":88,"triangles":1441,"points":8720,"lines":0}
+FRAME medium quarters {"calls":113,"triangles":6613,"points":8720,"lines":0}
+FRAME medium galley {"calls":100,"triangles":5507,"points":8720,"lines":0}
+FRAME medium bathroom {"calls":123,"triangles":6897,"points":8720,"lines":0}
+FRAME medium cockpit_window {"calls":71,"triangles":3381,"points":8720,"lines":0}
+FRAME high corridor {"calls":195,"triangles":8909,"points":8720,"lines":0}
+FRAME high cockpit {"calls":88,"triangles":1441,"points":8720,"lines":0}
+FRAME high quarters {"calls":113,"triangles":6613,"points":8720,"lines":0}
+FRAME high galley {"calls":100,"triangles":5507,"points":8720,"lines":0}
+FRAME high bathroom {"calls":123,"triangles":6897,"points":8720,"lines":0}
+FRAME high cockpit_window {"calls":71,"triangles":3381,"points":8720,"lines":0}
+INTERACT {"eat":{"hover":{"ray":[null,"E: Eat",null],"idbg":"E: Eat","prompt":"E: Eat","promptShown":true,"message":"","status":"SHIP TIME 08:01 · ENERGY 86% · CRUISE 0.42c"},"after":{"prompt":"E: Eat","promptShown":false,"message":"YOU EAT. ENERGY RESTORED.","status":"SHIP TIME 08:21 · ENERGY 100% · CRUISE 0.42c"},"energyBefore":86,"energyAfter":100,"statusChanged":true},"refresh":{"hover":{"ray":[null,null,"E: Freshen Up"],"idbg":"E: Freshen Up","prompt":"E: Freshen Up","promptShown":true,"message":"YOU EAT. ENERGY RESTORED.","status":"SHIP TIME 08:22 · ENERGY 100% · CRUISE 0.42c"},"after":{"prompt":"E: Freshen Up","promptShown":false,"message":"REFRESHED.","status":"SHIP TIME 08:33 · ENERGY 100% · CRUISE 0.42c"}},"sleep":{"hover":{"ray":["E: Sleep",null,null],"idbg":"E: Sleep","prompt":"E: Sleep","promptShown":true,"message":"REFRESHED.","status":"SHIP TIME 08:34 · ENERGY 100% · CRUISE 0.42c"},"after":{"prompt":"E: Sleep","promptShown":false,"message":"8 HOURS PASS","status":"SHIP TIME 16:34 · ENERGY 100% · CRUISE 0.42c"},"energyAfter":100}}
+ZOOM {"calls":71,"triangles":3381,"points":8720,"lines":0,"render":[1280,720],"crop":{"width":1280,"height":720,"x":330,"y":270,"w":260,"h":200,"scale":3},"elapsed":70,"pose":[0,1.7,-9.6,0,0.06],"tier":"high","png":"shots/planet-segments/after/zoom_cockpit_window.png"}
+PERF after done {"revision":"200b89e","dirtySrc":["M src/space.js"],"consoleErrors":0}
+$ PUPPETEER_EXECUTABLE_PATH=…/chrome-headless-shell npm run shoot -- perf compare shots/planet-segments   # src/space.js planet+atmosphere 24×16
+
+> spaceship@1.0.0 shoot
+> node scripts/shoot.mjs perf compare shots/planet-segments
+
+COMPARE low_corridor {"calls":[160,160],"tris":[8780,8780],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_cockpit {"calls":[57,57],"tris":[1408,1408],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_quarters {"calls":[82,82],"tris":[10374,5862],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_galley {"calls":[70,70],"tris":[5476,5476],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_bathroom {"calls":[94,94],"tris":[10662,6150],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_cockpit_window {"calls":[39,39],"tris":[7140,2628],"diffPixels":1670,"maxChannelDiff":135}
+COMPARE medium_corridor {"calls":[195,195],"tris":[8909,8909],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_cockpit {"calls":[88,88],"tris":[1441,1441],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_quarters {"calls":[113,113],"tris":[13381,6613],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_galley {"calls":[100,100],"tris":[5507,5507],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_bathroom {"calls":[123,123],"tris":[13665,6897],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_cockpit_window {"calls":[71,71],"tris":[10149,3381],"diffPixels":1640,"maxChannelDiff":119}
+COMPARE high_corridor {"calls":[195,195],"tris":[8909,8909],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_cockpit {"calls":[88,88],"tris":[1441,1441],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_quarters {"calls":[113,113],"tris":[13381,6613],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_galley {"calls":[100,100],"tris":[5507,5507],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_bathroom {"calls":[123,123],"tris":[13665,6897],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_cockpit_window {"calls":[71,71],"tris":[10149,3381],"diffPixels":1589,"maxChannelDiff":123}
+COMPARE zoom_cockpit_window {"calls":[71,71],"tris":[10149,3381],"diffPixels":56268,"maxChannelDiff":137}
+SUMMARY {"colliders":true,"collision":true,"interactions":true}
+| tier | room | calls before | calls after | Δ | tris before | tris after | Δ | diff px | max ch |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| low | corridor | 160 | 160 | 0 | 8780 | 8780 | 0 | 0 | 0 |
+| low | cockpit | 57 | 57 | 0 | 1408 | 1408 | 0 | 0 | 0 |
+| low | quarters | 82 | 82 | 0 | 10374 | 5862 | -4512 | 0 | 0 |
+| low | galley | 70 | 70 | 0 | 5476 | 5476 | 0 | 0 | 0 |
+| low | bathroom | 94 | 94 | 0 | 10662 | 6150 | -4512 | 0 | 0 |
+| low | cockpit_window | 39 | 39 | 0 | 7140 | 2628 | -4512 | 1670 | 135 |
+| medium | corridor | 195 | 195 | 0 | 8909 | 8909 | 0 | 0 | 0 |
+| medium | cockpit | 88 | 88 | 0 | 1441 | 1441 | 0 | 0 | 0 |
+| medium | quarters | 113 | 113 | 0 | 13381 | 6613 | -6768 | 0 | 0 |
+| medium | galley | 100 | 100 | 0 | 5507 | 5507 | 0 | 0 | 0 |
+| medium | bathroom | 123 | 123 | 0 | 13665 | 6897 | -6768 | 0 | 0 |
+| medium | cockpit_window | 71 | 71 | 0 | 10149 | 3381 | -6768 | 1640 | 119 |
+| high | corridor | 195 | 195 | 0 | 8909 | 8909 | 0 | 0 | 0 |
+| high | cockpit | 88 | 88 | 0 | 1441 | 1441 | 0 | 0 | 0 |
+| high | quarters | 113 | 113 | 0 | 13381 | 6613 | -6768 | 0 | 0 |
+| high | galley | 100 | 100 | 0 | 5507 | 5507 | 0 | 0 | 0 |
+| high | bathroom | 123 | 123 | 0 | 13665 | 6897 | -6768 | 0 | 0 |
+| high | cockpit_window | 71 | 71 | 0 | 10149 | 3381 | -6768 | 1589 | 123 |
+| zoom | cockpit_window | 71 | 71 | 0 | 10149 | 3381 | -6768 | 56268 | 137 |
+$ PUPPETEER_EXECUTABLE_PATH=…/chrome-headless-shell npm run shoot -- perf after shots/planet-segments   # src/space.js planet+atmosphere 32×24 (final)
+
+> spaceship@1.0.0 shoot
+> node scripts/shoot.mjs perf after shots/planet-segments
+
+11:19:01 AM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+PASSES high [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES low [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":false},{"name":"UnrealBloomPass","enabled":false},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES medium [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES medium [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES high [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES low [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":false},{"name":"UnrealBloomPass","enabled":false},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+COLLIDERS 58
+COLLISION {"a":{"x":1.0799999999999998,"z":0},"b":{"x":0,"z":6.68}}
+SCENE {"meshes":188,"lights":13,"tris":14243}
+FRAME low corridor {"calls":160,"triangles":8780,"points":4360,"lines":0}
+FRAME low cockpit {"calls":57,"triangles":1408,"points":4360,"lines":0}
+FRAME low quarters {"calls":82,"triangles":7366,"points":4360,"lines":0}
+FRAME low galley {"calls":70,"triangles":5476,"points":4360,"lines":0}
+FRAME low bathroom {"calls":94,"triangles":7654,"points":4360,"lines":0}
+FRAME low cockpit_window {"calls":39,"triangles":4132,"points":4360,"lines":0}
+FRAME medium corridor {"calls":195,"triangles":8909,"points":8720,"lines":0}
+FRAME medium cockpit {"calls":88,"triangles":1441,"points":8720,"lines":0}
+FRAME medium quarters {"calls":113,"triangles":8869,"points":8720,"lines":0}
+FRAME medium galley {"calls":100,"triangles":5507,"points":8720,"lines":0}
+FRAME medium bathroom {"calls":123,"triangles":9153,"points":8720,"lines":0}
+FRAME medium cockpit_window {"calls":71,"triangles":5637,"points":8720,"lines":0}
+FRAME high corridor {"calls":195,"triangles":8909,"points":8720,"lines":0}
+FRAME high cockpit {"calls":88,"triangles":1441,"points":8720,"lines":0}
+FRAME high quarters {"calls":113,"triangles":8869,"points":8720,"lines":0}
+FRAME high galley {"calls":100,"triangles":5507,"points":8720,"lines":0}
+FRAME high bathroom {"calls":123,"triangles":9153,"points":8720,"lines":0}
+FRAME high cockpit_window {"calls":71,"triangles":5637,"points":8720,"lines":0}
+INTERACT {"eat":{"hover":{"ray":[null,"E: Eat",null],"idbg":"E: Eat","prompt":"E: Eat","promptShown":true,"message":"","status":"SHIP TIME 08:00 · ENERGY 86% · CRUISE 0.42c"},"after":{"prompt":"E: Eat","promptShown":false,"message":"YOU EAT. ENERGY RESTORED.","status":"SHIP TIME 08:21 · ENERGY 100% · CRUISE 0.42c"},"energyBefore":86,"energyAfter":100,"statusChanged":true},"refresh":{"hover":{"ray":[null,null,"E: Freshen Up"],"idbg":"E: Freshen Up","prompt":"E: Freshen Up","promptShown":true,"message":"YOU EAT. ENERGY RESTORED.","status":"SHIP TIME 08:22 · ENERGY 100% · CRUISE 0.42c"},"after":{"prompt":"E: Freshen Up","promptShown":false,"message":"REFRESHED.","status":"SHIP TIME 08:33 · ENERGY 100% · CRUISE 0.42c"}},"sleep":{"hover":{"ray":["E: Sleep",null,null],"idbg":"E: Sleep","prompt":"E: Sleep","promptShown":true,"message":"REFRESHED.","status":"SHIP TIME 08:34 · ENERGY 100% · CRUISE 0.42c"},"after":{"prompt":"E: Sleep","promptShown":false,"message":"8 HOURS PASS","status":"SHIP TIME 16:34 · ENERGY 100% · CRUISE 0.42c"},"energyAfter":100}}
+ZOOM {"calls":71,"triangles":5637,"points":8720,"lines":0,"render":[1280,720],"crop":{"width":1280,"height":720,"x":330,"y":270,"w":260,"h":200,"scale":3},"elapsed":70,"pose":[0,1.7,-9.6,0,0.06],"tier":"high","png":"shots/planet-segments/after/zoom_cockpit_window.png"}
+PERF after done {"revision":"200b89e","dirtySrc":["M src/space.js"],"consoleErrors":0}
+$ PUPPETEER_EXECUTABLE_PATH=…/chrome-headless-shell npm run shoot -- perf compare shots/planet-segments   # src/space.js planet+atmosphere 32×24 (final)
+
+> spaceship@1.0.0 shoot
+> node scripts/shoot.mjs perf compare shots/planet-segments
+
+COMPARE low_corridor {"calls":[160,160],"tris":[8780,8780],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_cockpit {"calls":[57,57],"tris":[1408,1408],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_quarters {"calls":[82,82],"tris":[10374,7366],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_galley {"calls":[70,70],"tris":[5476,5476],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_bathroom {"calls":[94,94],"tris":[10662,7654],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_cockpit_window {"calls":[39,39],"tris":[7140,4132],"diffPixels":1067,"maxChannelDiff":135}
+COMPARE medium_corridor {"calls":[195,195],"tris":[8909,8909],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_cockpit {"calls":[88,88],"tris":[1441,1441],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_quarters {"calls":[113,113],"tris":[13381,8869],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_galley {"calls":[100,100],"tris":[5507,5507],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_bathroom {"calls":[123,123],"tris":[13665,9153],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_cockpit_window {"calls":[71,71],"tris":[10149,5637],"diffPixels":1051,"maxChannelDiff":119}
+COMPARE high_corridor {"calls":[195,195],"tris":[8909,8909],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_cockpit {"calls":[88,88],"tris":[1441,1441],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_quarters {"calls":[113,113],"tris":[13381,8869],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_galley {"calls":[100,100],"tris":[5507,5507],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_bathroom {"calls":[123,123],"tris":[13665,9153],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_cockpit_window {"calls":[71,71],"tris":[10149,5637],"diffPixels":1019,"maxChannelDiff":123}
+COMPARE zoom_cockpit_window {"calls":[71,71],"tris":[10149,5637],"diffPixels":38034,"maxChannelDiff":137}
+SUMMARY {"colliders":true,"collision":true,"interactions":true}
+| tier | room | calls before | calls after | Δ | tris before | tris after | Δ | diff px | max ch |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| low | corridor | 160 | 160 | 0 | 8780 | 8780 | 0 | 0 | 0 |
+| low | cockpit | 57 | 57 | 0 | 1408 | 1408 | 0 | 0 | 0 |
+| low | quarters | 82 | 82 | 0 | 10374 | 7366 | -3008 | 0 | 0 |
+| low | galley | 70 | 70 | 0 | 5476 | 5476 | 0 | 0 | 0 |
+| low | bathroom | 94 | 94 | 0 | 10662 | 7654 | -3008 | 0 | 0 |
+| low | cockpit_window | 39 | 39 | 0 | 7140 | 4132 | -3008 | 1067 | 135 |
+| medium | corridor | 195 | 195 | 0 | 8909 | 8909 | 0 | 0 | 0 |
+| medium | cockpit | 88 | 88 | 0 | 1441 | 1441 | 0 | 0 | 0 |
+| medium | quarters | 113 | 113 | 0 | 13381 | 8869 | -4512 | 0 | 0 |
+| medium | galley | 100 | 100 | 0 | 5507 | 5507 | 0 | 0 | 0 |
+| medium | bathroom | 123 | 123 | 0 | 13665 | 9153 | -4512 | 0 | 0 |
+| medium | cockpit_window | 71 | 71 | 0 | 10149 | 5637 | -4512 | 1051 | 119 |
+| high | corridor | 195 | 195 | 0 | 8909 | 8909 | 0 | 0 | 0 |
+| high | cockpit | 88 | 88 | 0 | 1441 | 1441 | 0 | 0 | 0 |
+| high | quarters | 113 | 113 | 0 | 13381 | 8869 | -4512 | 0 | 0 |
+| high | galley | 100 | 100 | 0 | 5507 | 5507 | 0 | 0 | 0 |
+| high | bathroom | 123 | 123 | 0 | 13665 | 9153 | -4512 | 0 | 0 |
+| high | cockpit_window | 71 | 71 | 0 | 10149 | 5637 | -4512 | 1019 | 123 |
+| zoom | cockpit_window | 71 | 71 | 0 | 10149 | 5637 | -4512 | 38034 | 137 |
