@@ -1,0 +1,108 @@
+# perf run log — base revision 38b6b27 (main); browser Chromium 145.0.7632.0 arm64 headless shell (Playwright chromium_headless_shell-1208)
+# Chromium flags: '--no-sandbox', '--enable-unsafe-swiftshader', '--use-angle=swiftshader', '--disable-dev-shm-usage',
+# viewport 480x270, deviceScaleFactor 1; one deterministic frame per tier x room via __shot.capture(18, 0, 0) (grain off)
+# 'before' ran with src/post.js and src/ship.js restored from 38b6b27 (git show HEAD:src/...), measurement hooks applied
+$ PUPPETEER_EXECUTABLE_PATH=/home/rovr/.cache/ms-playwright/chromium_headless_shell-1208/chrome-linux/headless_shell npm run shoot -- perf before   # base 38b6b27 + measurement hooks only (src/post.js, src/ship.js unchanged)
+
+> spaceship@1.0.0 shoot
+> node scripts/shoot.mjs perf before
+
+8:29:58 AM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+PASSES high [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES low [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":false},{"name":"UnrealBloomPass","enabled":false},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES medium [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES medium [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES high [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES low [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":false},{"name":"UnrealBloomPass","enabled":false},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+COLLIDERS 58
+COLLISION {"a":{"x":1.0799999999999998,"z":0},"b":{"x":0,"z":6.68}}
+SCENE {"meshes":288,"lights":13,"tris":17251}
+FRAME low corridor {"calls":247,"triangles":8636,"points":4360,"lines":0}
+FRAME low cockpit {"calls":57,"triangles":1408,"points":4360,"lines":0}
+FRAME low quarters {"calls":90,"triangles":9090,"points":4360,"lines":0}
+FRAME low galley {"calls":74,"triangles":4144,"points":4360,"lines":0}
+FRAME low bathroom {"calls":107,"triangles":9438,"points":4360,"lines":0}
+FRAME medium corridor {"calls":527,"triangles":17399,"points":13080,"lines":0}
+FRAME medium cockpit {"calls":143,"triangles":2847,"points":13080,"lines":0}
+FRAME medium quarters {"calls":209,"triangles":21185,"points":13080,"lines":0}
+FRAME medium galley {"calls":176,"triangles":8317,"points":13080,"lines":0}
+FRAME medium bathroom {"calls":241,"triangles":21877,"points":13080,"lines":0}
+FRAME high corridor {"calls":527,"triangles":17399,"points":13080,"lines":0}
+FRAME high cockpit {"calls":143,"triangles":2847,"points":13080,"lines":0}
+FRAME high quarters {"calls":209,"triangles":21185,"points":13080,"lines":0}
+FRAME high galley {"calls":176,"triangles":8317,"points":13080,"lines":0}
+FRAME high bathroom {"calls":241,"triangles":21877,"points":13080,"lines":0}
+INTERACT {"eat":{"hover":{"ray":[null,"E: Eat",null],"idbg":"E: Eat","prompt":"E: Eat","promptShown":true,"message":"","status":"SHIP TIME 08:01 · ENERGY 86% · CRUISE 0.42c"},"after":{"prompt":"E: Eat","promptShown":false,"message":"YOU EAT. ENERGY RESTORED.","status":"SHIP TIME 08:21 · ENERGY 100% · CRUISE 0.42c"},"energyBefore":86,"energyAfter":100,"statusChanged":true},"refresh":{"hover":{"ray":[null,null,"E: Freshen Up"],"idbg":"E: Freshen Up","prompt":"E: Freshen Up","promptShown":true,"message":"YOU EAT. ENERGY RESTORED.","status":"SHIP TIME 08:22 · ENERGY 100% · CRUISE 0.42c"},"after":{"prompt":"E: Freshen Up","promptShown":false,"message":"REFRESHED.","status":"SHIP TIME 08:33 · ENERGY 100% · CRUISE 0.42c"}},"sleep":{"hover":{"ray":["E: Sleep",null,null],"idbg":"E: Sleep","prompt":"E: Sleep","promptShown":true,"message":"REFRESHED.","status":"SHIP TIME 08:34 · ENERGY 100% · CRUISE 0.42c"},"after":{"prompt":"E: Sleep","promptShown":false,"message":"8 HOURS PASS","status":"SHIP TIME 16:34 · ENERGY 100% · CRUISE 0.42c"},"energyAfter":100}}
+PERF before done {"revision":"38b6b27","dirtySrc":["MM src/main.js","MM src/post.js","MM src/ship.js"],"consoleErrors":0}
+
+$ PUPPETEER_EXECUTABLE_PATH=/home/rovr/.cache/ms-playwright/chromium_headless_shell-1208/chrome-linux/headless_shell npm run shoot -- perf after   # src/post.js + src/ship.js changed
+
+> spaceship@1.0.0 shoot
+> node scripts/shoot.mjs perf after
+
+8:30:59 AM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+PASSES high [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES low [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":false},{"name":"UnrealBloomPass","enabled":false},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES medium [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES medium [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES high [{"name":"RenderPass","enabled":false},{"name":"N8AOPass","enabled":true},{"name":"UnrealBloomPass","enabled":true},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+PASSES low [{"name":"RenderPass","enabled":true},{"name":"N8AOPass","enabled":false},{"name":"UnrealBloomPass","enabled":false},{"name":"ShaderPass","enabled":true},{"name":"OutputPass","enabled":true}]
+COLLIDERS 58
+COLLISION {"a":{"x":1.0799999999999998,"z":0},"b":{"x":0,"z":6.68}}
+SCENE {"meshes":188,"lights":13,"tris":17251}
+FRAME low corridor {"calls":160,"triangles":8780,"points":4360,"lines":0}
+FRAME low cockpit {"calls":57,"triangles":1408,"points":4360,"lines":0}
+FRAME low quarters {"calls":82,"triangles":10374,"points":4360,"lines":0}
+FRAME low galley {"calls":70,"triangles":5476,"points":4360,"lines":0}
+FRAME low bathroom {"calls":94,"triangles":10662,"points":4360,"lines":0}
+FRAME medium corridor {"calls":195,"triangles":8909,"points":8720,"lines":0}
+FRAME medium cockpit {"calls":88,"triangles":1441,"points":8720,"lines":0}
+FRAME medium quarters {"calls":113,"triangles":13381,"points":8720,"lines":0}
+FRAME medium galley {"calls":100,"triangles":5507,"points":8720,"lines":0}
+FRAME medium bathroom {"calls":123,"triangles":13665,"points":8720,"lines":0}
+FRAME high corridor {"calls":195,"triangles":8909,"points":8720,"lines":0}
+FRAME high cockpit {"calls":88,"triangles":1441,"points":8720,"lines":0}
+FRAME high quarters {"calls":113,"triangles":13381,"points":8720,"lines":0}
+FRAME high galley {"calls":100,"triangles":5507,"points":8720,"lines":0}
+FRAME high bathroom {"calls":123,"triangles":13665,"points":8720,"lines":0}
+INTERACT {"eat":{"hover":{"ray":[null,"E: Eat",null],"idbg":"E: Eat","prompt":"E: Eat","promptShown":true,"message":"","status":"SHIP TIME 08:01 · ENERGY 86% · CRUISE 0.42c"},"after":{"prompt":"E: Eat","promptShown":false,"message":"YOU EAT. ENERGY RESTORED.","status":"SHIP TIME 08:21 · ENERGY 100% · CRUISE 0.42c"},"energyBefore":86,"energyAfter":100,"statusChanged":true},"refresh":{"hover":{"ray":[null,null,"E: Freshen Up"],"idbg":"E: Freshen Up","prompt":"E: Freshen Up","promptShown":true,"message":"YOU EAT. ENERGY RESTORED.","status":"SHIP TIME 08:22 · ENERGY 100% · CRUISE 0.42c"},"after":{"prompt":"E: Freshen Up","promptShown":false,"message":"REFRESHED.","status":"SHIP TIME 08:33 · ENERGY 100% · CRUISE 0.42c"}},"sleep":{"hover":{"ray":["E: Sleep",null,null],"idbg":"E: Sleep","prompt":"E: Sleep","promptShown":true,"message":"REFRESHED.","status":"SHIP TIME 08:34 · ENERGY 100% · CRUISE 0.42c"},"after":{"prompt":"E: Sleep","promptShown":false,"message":"8 HOURS PASS","status":"SHIP TIME 16:35 · ENERGY 100% · CRUISE 0.42c"},"energyAfter":100}}
+PERF after done {"revision":"38b6b27","dirtySrc":["MM src/main.js","M  src/post.js","M  src/ship.js"],"consoleErrors":0}
+
+$ PUPPETEER_EXECUTABLE_PATH=/home/rovr/.cache/ms-playwright/chromium_headless_shell-1208/chrome-linux/headless_shell npm run shoot -- perf compare
+
+> spaceship@1.0.0 shoot
+> node scripts/shoot.mjs perf compare
+
+COMPARE low_corridor {"calls":[247,160],"tris":[8636,8780],"diffPixels":25,"maxChannelDiff":11}
+COMPARE low_cockpit {"calls":[57,57],"tris":[1408,1408],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_quarters {"calls":[90,82],"tris":[9090,10374],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_galley {"calls":[74,70],"tris":[4144,5476],"diffPixels":0,"maxChannelDiff":0}
+COMPARE low_bathroom {"calls":[107,94],"tris":[9438,10662],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_corridor {"calls":[527,195],"tris":[17399,8909],"diffPixels":380,"maxChannelDiff":5}
+COMPARE medium_cockpit {"calls":[143,88],"tris":[2847,1441],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_quarters {"calls":[209,113],"tris":[21185,13381],"diffPixels":1,"maxChannelDiff":1}
+COMPARE medium_galley {"calls":[176,100],"tris":[8317,5507],"diffPixels":0,"maxChannelDiff":0}
+COMPARE medium_bathroom {"calls":[241,123],"tris":[21877,13665],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_corridor {"calls":[527,195],"tris":[17399,8909],"diffPixels":475,"maxChannelDiff":5}
+COMPARE high_cockpit {"calls":[143,88],"tris":[2847,1441],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_quarters {"calls":[209,113],"tris":[21185,13381],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_galley {"calls":[176,100],"tris":[8317,5507],"diffPixels":0,"maxChannelDiff":0}
+COMPARE high_bathroom {"calls":[241,123],"tris":[21877,13665],"diffPixels":0,"maxChannelDiff":0}
+SUMMARY {"colliders":true,"collision":true,"interactions":true}
+| tier | room | calls before | calls after | Δ | tris before | tris after | Δ | diff px | max ch |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| low | corridor | 247 | 160 | -87 | 8636 | 8780 | 144 | 25 | 11 |
+| low | cockpit | 57 | 57 | 0 | 1408 | 1408 | 0 | 0 | 0 |
+| low | quarters | 90 | 82 | -8 | 9090 | 10374 | 1284 | 0 | 0 |
+| low | galley | 74 | 70 | -4 | 4144 | 5476 | 1332 | 0 | 0 |
+| low | bathroom | 107 | 94 | -13 | 9438 | 10662 | 1224 | 0 | 0 |
+| medium | corridor | 527 | 195 | -332 | 17399 | 8909 | -8490 | 380 | 5 |
+| medium | cockpit | 143 | 88 | -55 | 2847 | 1441 | -1406 | 0 | 0 |
+| medium | quarters | 209 | 113 | -96 | 21185 | 13381 | -7804 | 1 | 1 |
+| medium | galley | 176 | 100 | -76 | 8317 | 5507 | -2810 | 0 | 0 |
+| medium | bathroom | 241 | 123 | -118 | 21877 | 13665 | -8212 | 0 | 0 |
+| high | corridor | 527 | 195 | -332 | 17399 | 8909 | -8490 | 475 | 5 |
+| high | cockpit | 143 | 88 | -55 | 2847 | 1441 | -1406 | 0 | 0 |
+| high | quarters | 209 | 113 | -96 | 21185 | 13381 | -7804 | 0 | 0 |
+| high | galley | 176 | 100 | -76 | 8317 | 5507 | -2810 | 0 | 0 |
+| high | bathroom | 241 | 123 | -118 | 21877 | 13665 | -8212 | 0 | 0 |

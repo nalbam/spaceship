@@ -23,7 +23,7 @@ time. It needs no browser, GPU, or network. The suites cover:
 | `tests/settings.test.js` | settings defaults, nothing stored, broken JSON, wrong structure/types, missing fields, out-of-range clamping, throwing storage, save → load round trip that keeps other keys |
 | `tests/player.test.js` | mouse-look sensitivity (default, range, clamping), menu clicks (`[data-no-lock]`) not requesting pointer lock, held keys cleared on lock change |
 | `tests/audio.test.js` | every sound effect passes through the master gain; `setMasterVolume` before and after the AudioContext exists |
-| `tests/post.test.js` | `setQuality` pass/size/pixel-ratio tiers and their persistence across `setSize` |
+| `tests/post.test.js` | `setQuality` pass/size/pixel-ratio tiers and their persistence across `setSize`; pass order and count (5); `RenderPass` enabled only on `low` (default `high`, tier switches, repeated tiers, after `setSize`) and N8AO `autoRenderBeauty` kept on |
 | `tests/interact.test.js` | interaction message timing |
 | `tests/rooms.test.js` | room bounds equal the ship geometry (`ship.js` imports them), interior points of all five rooms, back-and-forth sequences at the four doors (no change inside the 0.3 m margin, one change when well inside), points in walls or outside the ship, default with no previous room, `#room` written only on a room change |
 
@@ -55,9 +55,9 @@ reaches the game (E, R and WASD do nothing), wherever the keyboard focus is.
 
 | Setting | Values | Effect |
 | --- | --- | --- |
-| Graphics quality | `high` (default) | original look: N8AO (Medium) + full-resolution bloom, pixel ratio min(devicePixelRatio, 1.75) |
-| | `medium` | N8AO Performance mode, bloom rendered at half resolution |
-| | `low` | N8AO and bloom off, renderer pixel ratio 1 |
+| Graphics quality | `high` (default) | original look: N8AO (Medium) + full-resolution bloom, pixel ratio min(devicePixelRatio, 1.75); N8AO renders the scene (RenderPass off) |
+| | `medium` | N8AO Performance mode, bloom rendered at half resolution; N8AO renders the scene (RenderPass off) |
+| | `low` | N8AO and bloom off, RenderPass renders the scene, renderer pixel ratio 1 |
 | Volume | 0–100 % (default 100 %) | master gain of every sound effect; 0 % is silent |
 | Mouse sensitivity | 0.25×–3× (default 1×) | multiplier on mouse-look yaw and pitch |
 
@@ -76,6 +76,9 @@ apply for the current session; the menu then shows
 npm run shoot              # boots vite + headless Chrome (SwiftShader), writes shots/*.png
 npm run shoot -- settings  # focused settings-menu check only, writes shots/settings/
 npm run shoot -- rooms     # HUD room-name check only, writes shots/rooms/
+npm run shoot -- perf before   # render cost + deterministic frames, writes shots/perf/before/
+npm run shoot -- perf after    # same after a change, writes shots/perf/after/
+npm run shoot -- perf compare  # compares both, writes shots/perf/report.json and shots/perf/diff/
 ```
 
 Puppeteer uses its own downloaded Chrome. To use an installed Chromium
@@ -93,7 +96,12 @@ At each step it compares the menu text with the state actually applied to
 `post.js`, `audio.js` (the real master `GainNode`) and `Player`, and with the
 stored value. If headless Chromium does not release the lock on Esc, it calls
 `document.exitPointerLock()` (same `pointerlockchange` path) and records this
-in the report. Any failed check exits with code 1. Output:
+in the report. Headless Chromium can also send one synthetic `mousemove`
+right after the lock that turns the player, so the W check measures the
+movement along the facing read just before W (and requires that the yaw
+does not change while W is held). Before the throwing-storage page opens, the
+first page goes to `about:blank` so its frame loop does not slow the second
+page load. Any failed check exits with code 1. Output:
 `shots/settings/*.png` (before/after screenshots) and
 `shots/settings/report.json` (every step's UI text, applied state,
 `localStorage` value, console errors and the pass/fail result).
@@ -114,10 +122,31 @@ expected/actual text, write counts, rects, console errors, result) and
 `shots/rooms/run.log` (the run's output, saved with
 `npm run shoot -- rooms 2>&1 | tee shots/rooms/run.log`).
 
+The perf check measures render cost with the same input before and after a
+change. `perf before|after` loads the page once at 480×270
+(deviceScaleFactor 1), records the post pass chain of each tier, the collider
+boxes (`__shot.colliders()`), the two collision walks and the scene stats,
+then pauses the frame loop and renders one deterministic frame per tier
+(`low`, `medium`, `high`) × room (the five rooms-check positions, eye height
+1.7 m) with `__shot.capture(18, 0, 0)` (film grain off). For each frame it
+stores the draw calls and triangles of the whole `composer.render` and the
+canvas PNG, re-encoded losslessly (RGB, Paeth, zlib 9) to keep the files small. Last, on `low`,
+it aims at the stove, the bathroom sink and the bed and records the ray and
+hover labels, the prompt and the E result (eat status, `REFRESHED.`,
+`8 HOURS PASS`). Output: `shots/perf/<label>/<tier>_<room>.png` and
+`shots/perf/<label>/result.json`. `perf compare` compares the two PNG sets in
+a browser canvas (no extra dependency) and writes `shots/perf/report.json`
+(calls/triangles before/after, differing pixels and maximum channel
+difference per frame, passes, collider/collision/interaction equality) and,
+only for frames that differ, `shots/perf/diff/<tier>_<room>.png`.
+Save the output with `2>&1 | tee -a shots/perf/run.log`; the summary of the
+last measurement is `shots/perf/REPORT.md`. Frame times are not recorded:
+SwiftShader is a CPU renderer, so real-GPU timing must be checked on a device.
+
 The page exposes `window.__shot` (teleport camera, set space time, force rest
 lighting, probe light intensities, scene stats, collision walks, raycast,
 audio/position state and `settings()` — menu values vs. applied quality,
-volume, sensitivity, pixel ratio and post passes, `room()` — current room id, written text, `#room` text and write count, `place(x, z, yaw, pitch)` — move the real player feet and release the debug camera; `set()` moves only the camera) so the rig can frame deterministic shots and verify
+volume, sensitivity, pixel ratio and post passes, `room()` — current room id, written text, `#room` text and write count, `place(x, z, yaw, pitch)` — move the real player feet and release the debug camera; `set()` moves only the camera, `frameInfo()` — draw calls/triangles/points/lines of one whole `composer.render` (`info()` counts only the last pass), `pause(bool)` — stop/resume the frame loop, `quality(level)` — select a tier through the settings path, `capture(elapsed, grainTime, grain?)` — render one frame with fixed clock, grain time (optional `grain` amount override for that frame, `0` = no grain), flicker, star drift, glints and cockpit screen and return `{ info, png }` (PNG data URL read in the same task), `colliders()` — collider boxes as `[min, max]` arrays in order) so the rig can frame deterministic shots and verify
 movement, collision, and the interaction flow end to end.
 
 ## Architecture
@@ -127,11 +156,11 @@ movement, collision, and the interaction flow end to end.
 | `src/main.js` | renderer, scene, PMREM env, frame loop (`player.update`, then the `#room` HUD from `player.position`, then the other modules), settings menu wiring (load → apply before first frame, save on change, pause screen, game keys blocked while the overlay is visible), debug rig |
 | `src/settings.js` | settings defaults, validation/clamping, JSON parse/serialize, `localStorage` read/write with injected storage (no browser access at import) |
 | `src/player.js` | pointer lock (overlay click, `requestLock()`, `[data-no-lock]` menu exclusion), mouse look × sensitivity (`setSensitivity`, 0.25–3), WASD, Shift run, Space jump (gravity, ceiling bump, landing on furniture), head bob, capsule-vs-AABB collision |
-| `src/ship.js` | interior kit-bash: corridor, cockpit, quarters, galley, bathroom (bounds from `src/rooms.js`); lights + rest-cycle mix |
+| `src/ship.js` | interior kit-bash: corridor, cockpit, quarters, galley, bathroom (bounds from `src/rooms.js`); lights + rest-cycle mix. Static repeated corridor meshes (pipes, greebles, ribs, ceiling light boxes and frames, porthole bolts, wall runs with band/trim, hatch spokes, grate glow, red lamps) are merged into one mesh per shared material; collider boxes (`colliders`) are separate data, and the interactables (bed, galley eat, bath fixtures) and porthole glass are not merged |
 | `src/rooms.js` | pure (no browser, no three): room bounds shared with `ship.js`, HUD names, `roomAt(x, z, prev)` with 0.3 m hysteresis, `createRoomHud(el)` that writes the text only on a room change |
 | `src/space.js` | parallax star shells, near dust drift, gas giant + atmosphere rim, nebula billboards |
 | `src/interact.js` | center-screen raycast, hover highlight + prompt, sleep/eat/refresh flows, HUD status |
-| `src/post.js` | N8AO → UnrealBloom → split toning/vignette/grain → OutputPass (ACES on renderer); `setQuality('low' \| 'medium' \| 'high')`, kept across `setSize` |
+| `src/post.js` | RenderPass → N8AO → UnrealBloom → split toning/vignette/grain → OutputPass (ACES on renderer); `setQuality('low' \| 'medium' \| 'high')`, kept across `setSize`. On `medium`/`high` N8AO renders the scene into its own target (`autoRenderBeauty`), so the RenderPass is disabled; only `low` uses the RenderPass |
 | `src/audio.js` | procedural Web Audio footsteps (thump + bandpassed tap) synced to head-bob footfalls, weapon sounds; one master gain, `setMasterVolume(0–1)` (works before the AudioContext exists) |
 | `index.html` | canvas host, HUD (`#room` top left, `#crosshair`, `#prompt`, `#status`, `#ammo`), `#message`, start / pause overlay and settings menu |
 | `src/textures.js` | canvas-generated PBR maps: painted panels, brushed metal, deck plate, grate, fabric; console screens |
