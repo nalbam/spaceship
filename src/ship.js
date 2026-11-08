@@ -76,6 +76,35 @@ export function buildShip(scene) {
   // x in [-1.4, 1.4], z in [-7, 7]
   const CW = ROOM_BOUNDS.corridor.x1; // corridor half width (1.4)
 
+  // Static repeated corridor meshes are collected here and merged into one
+  // mesh per material (fewer draw calls). add(mesh) bakes the mesh's transform
+  // (including a parent group's, when the group has no parent yet) into a copy
+  // of its geometry; the box() UV density is kept because it lives in the
+  // geometry. Materials stay shared instances, so setRestMix still drives the
+  // emissive strips. Colliders are separate data: slab() still calls
+  // addCollider. Interactables and transparent glass are not added here.
+  const corridorBatch = {
+    byMat: new Map(),
+    add(mesh) {
+      mesh.updateMatrixWorld(true);
+      const g = mesh.geometry.clone().applyMatrix4(mesh.matrixWorld);
+      if (!this.byMat.has(mesh.material)) this.byMat.set(mesh.material, []);
+      this.byMat.get(mesh.material).push(g);
+      return this;
+    },
+    addGroup(group) {
+      group.updateMatrixWorld(true);
+      group.traverse((o) => { if (o.isMesh) this.add(o); });
+    },
+    flush() {
+      for (const [mat, geos] of this.byMat) {
+        ship.add(new THREE.Mesh(mergeGeometries(geos), mat));
+        for (const g of geos) g.dispose();
+      }
+      this.byMat.clear();
+    },
+  };
+
   // floor + ceiling
   slab(0, -0.05, 0, CW * 2, 0.1, 14, M.floor);
   slab(0, CEIL_H + 0.05, 0, CW * 2, 0.1, 14, M.hullDark);
@@ -87,7 +116,7 @@ export function buildShip(scene) {
   for (const gx of [-0.62, 0.62]) {
     const glow = box(0.05, 0.02, 13.6, tealStripMat);
     glow.position.set(gx, 0.025, 0);
-    ship.add(glow);
+    corridorBatch.add(glow);
   }
 
   // corridor walls — leave openings: portholes (-x), quarters door (+x @ z=-1.5),
@@ -95,14 +124,15 @@ export function buildShip(scene) {
   // +x wall: solid from z=-7..-2.1, door z=-2.1..-0.9, solid -0.9..3.9, door 3.9..5.1, solid 5.1..7
   function wallRun(side, z0, z1, mat) {
     const len = z1 - z0;
-    slab(side * (CW + WALL_T / 2), CEIL_H / 2, (z0 + z1) / 2, WALL_T, CEIL_H, len, mat);
+    // wall mesh merged; its collider is still added by slab()
+    slab(side * (CW + WALL_T / 2), CEIL_H / 2, (z0 + z1) / 2, WALL_T, CEIL_H, len, mat, { parent: corridorBatch });
     // two-tone: darker kick band along the lower wall
     const band = box(0.04, 0.85, len, M.hullDark, 0.5);
     band.position.set(side * (CW - 0.005), 0.425, (z0 + z1) / 2);
-    ship.add(band);
+    corridorBatch.add(band);
     const trim = box(0.05, 0.06, len, M.accent, 1);
     trim.position.set(side * (CW - 0.01), 0.88, (z0 + z1) / 2);
-    ship.add(trim);
+    corridorBatch.add(trim);
   }
   wallRun(1, -7, -2.1, M.hull);
   wallRun(1, -0.9, 3.9, M.hull);
@@ -148,7 +178,7 @@ export function buildShip(scene) {
       const b = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.03, 6), M.darkMetal);
       b.rotation.z = Math.PI / 2; b.rotation.y = Math.PI / 2;
       b.position.set(x + WALL_T / 2 + 0.02, y + Math.sin(a) * 0.42, z + Math.cos(a) * 0.42);
-      ship.add(b);
+      corridorBatch.add(b);
     }
     // glass
     const glass = new THREE.Mesh(new THREE.CircleGeometry(0.33, 24), M.glass);
@@ -185,17 +215,17 @@ export function buildShip(scene) {
       rib.add(kick);
     }
     rib.position.z = z;
-    ship.add(rib);
+    corridorBatch.addGroup(rib);
   }
 
   // ceiling light strips between ribs (warm)
   for (let z = -5; z <= 5.01; z += 2) {
     const lightBox = box(0.8, 0.05, 1.0, whiteStripMat);
     lightBox.position.set(0, CEIL_H - 0.02, z);
-    ship.add(lightBox);
+    corridorBatch.add(lightBox);
     const frame = box(0.95, 0.06, 1.15, M.darkMetal, 1);
     frame.position.set(0, CEIL_H + 0.01, z);
-    ship.add(frame);
+    corridorBatch.add(frame);
   }
   // corridor point lights (warm practicals)
   for (let z = -4.5; z <= 5; z += 4.5) {
@@ -311,7 +341,7 @@ export function buildShip(scene) {
       const spoke = box(0.07, 0.6, 0.05, M.darkMetal, 1);
       spoke.position.set(Math.cos(a) * 0.42, 1.35 + Math.sin(a) * 0.42, 6.89);
       spoke.rotation.z = a + Math.PI / 2;
-      ship.add(spoke);
+      corridorBatch.add(spoke);
     }
     const stripeTop = box(2.4, 0.22, 0.06, M.stripe, 1);
     stripeTop.position.set(0, 2.42, 6.92);
@@ -320,9 +350,10 @@ export function buildShip(scene) {
     for (const sx of [-1.05, 1.05]) {
       const lamp = box(0.1, 0.1, 0.06, redStripMat);
       lamp.position.set(sx, 2.1, 6.92);
-      ship.add(lamp);
+      corridorBatch.add(lamp);
     }
   }
+  corridorBatch.flush();
 
   // ============================================================ cockpit
   // x in [-2.6, 2.6], z in [-11.6, -7]

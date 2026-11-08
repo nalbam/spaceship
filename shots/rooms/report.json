@@ -319,18 +319,18 @@
         "room": {
           "left": 28,
           "top": 24,
-          "right": 146.703125,
-          "bottom": 53
+          "right": 144.421875,
+          "bottom": 49
         },
         "status": {
-          "left": 439.1640625,
-          "top": 665,
-          "right": 840.8359375,
+          "left": 412.265625,
+          "top": 669,
+          "right": 867.734375,
           "bottom": 694
         },
         "ammo": {
-          "left": 1079.59375,
-          "top": 664,
+          "left": 1062.375,
+          "top": 668,
           "right": 1252,
           "bottom": 694
         },
@@ -341,10 +341,10 @@
           "bottom": 363
         },
         "prompt": {
-          "left": 583.890625,
+          "left": 579.9921875,
           "top": 403.1875,
-          "right": 696.109375,
-          "bottom": 436.1875
+          "right": 700.0078125,
+          "bottom": 432.1875
         }
       },
       "overlaps": [],
@@ -357,18 +357,18 @@
         "room": {
           "left": 28,
           "top": 24,
-          "right": 146.703125,
-          "bottom": 53
+          "right": 144.421875,
+          "bottom": 49
         },
         "status": {
-          "left": -5.8359375,
-          "top": 789,
-          "right": 395.8359375,
+          "left": -32.734375,
+          "top": 793,
+          "right": 422.734375,
           "bottom": 818
         },
         "ammo": {
-          "left": 189.59375,
-          "top": 788,
+          "left": 172.375,
+          "top": 792,
           "right": 362,
           "bottom": 818
         },
@@ -379,10 +379,10 @@
           "bottom": 425
         },
         "prompt": {
-          "left": 138.890625,
+          "left": 134.9921875,
           "top": 472.625,
-          "right": 251.109375,
-          "bottom": 505.625
+          "right": 255.0078125,
+          "bottom": 501.625
         }
       },
       "overlaps": [],
@@ -396,7 +396,7 @@
   ],
   "quality": "low",
   "consoleErrorCount": 0,
-  "seconds": 115.8,
-  "fps": 10.935480664081666,
+  "seconds": 222.1,
+  "fps": 10.973663208299826,
   "result": "pass"
 }

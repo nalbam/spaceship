@@ -154,7 +154,10 @@ document.addEventListener('pointerlockchange', () => {
 const clock = new THREE.Clock();
 let frames = 0, fpsAcc = 0, lastFps = 0, totalFrames = 0;
 
+let paused = false; // __shot.pause(): stop updating/rendering (deterministic capture)
+
 function tick() {
+  if (paused) { requestAnimationFrame(tick); return; }
   const dt = Math.min(clock.getDelta(), 0.1);
   const elapsed = clock.elapsedTime;
   player.update(dt);
@@ -171,6 +174,32 @@ function tick() {
 tick();
 
 // ---- debug / screenshot rig ----
+// State that the frame loop changes from frame history instead of from
+// clock.elapsedTime: passing glints in space (position += dt) and the cockpit
+// screen canvas swap. capture() restores the initial values so two page loads
+// render the same frame.
+const initialSpace = [];
+space.group.traverse((o) => initialSpace.push([o, o.position.clone()]));
+const initialCanvasTextures = [];
+scene.traverse((o) => {
+  const map = o.material?.map;
+  if (map?.isCanvasTexture || map?.image instanceof HTMLCanvasElement) initialCanvasTextures.push([map, map.image]);
+});
+const grainUniforms = post.composer.passes.find((p) => p.uniforms?.grain)?.uniforms;
+// one composer.render with renderer.info counting every render call in it
+function countFrame() {
+  const info = renderer.info;
+  const auto = info.autoReset;
+  info.autoReset = false;
+  info.reset();
+  try {
+    post.render(0);
+    const { calls, triangles, points, lines } = info.render;
+    return { calls, triangles, points, lines };
+  } finally {
+    info.autoReset = auto;
+  }
+}
 window.__shot = {
   set(x, y, z, yaw, pitch) { player.teleport(x, y, z, yaw, pitch); },
   release() { player.releaseDebug(); },
@@ -233,6 +262,36 @@ window.__shot = {
     return { meshes, lights, tris: Math.round(tris) };
   },
   info() { return renderer.info.render; },
+  // whole-frame cost: draw calls/triangles of every render call in one
+  // composer.render (info() only shows the last pass)
+  frameInfo() { return countFrame(); },
+  // stop (true) or resume (false) the frame loop
+  pause(v = true) { paused = !!v; return paused; },
+  // select a quality tier through the settings path (menu, storage, post)
+  quality(level) { updateSetting({ quality: level }); return post.getQuality(); },
+  // deterministic frame: fixed elapsed time, grain time, flicker, star drift,
+  // glints and screen canvas; renders once and returns the frame cost and the
+  // canvas as a PNG data URL read in the same task (no preserveDrawingBuffer).
+  // grain (optional) overrides the film-grain amount for this frame only;
+  // 0 gives a noise-free frame that compresses to a small PNG
+  capture(elapsed = 18, grainTime = 0, grain) {
+    for (const [o, p] of initialSpace) o.position.copy(p);
+    for (const [map, img] of initialCanvasTextures) {
+      if (map.image !== img) { map.image = img; map.needsUpdate = true; }
+    }
+    clock.elapsedTime = elapsed;
+    ship.update(0, elapsed);
+    space.update(0, elapsed);
+    if (grainUniforms) grainUniforms.time.value = grainTime;
+    const grain0 = grainUniforms?.grain.value;
+    if (grainUniforms && grain !== undefined) grainUniforms.grain.value = grain;
+    const info = countFrame();
+    const png = renderer.domElement.toDataURL('image/png');
+    if (grainUniforms) grainUniforms.grain.value = grain0;
+    return { info, png };
+  },
+  // collision boxes as [min xyz, max xyz] in array order
+  colliders() { return ship.colliders.map((b) => [b.min.toArray(), b.max.toArray()]); },
   // menu value shown vs. state actually applied to post / audio / Player
   settings() {
     const passes = post.composer.passes;

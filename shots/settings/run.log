@@ -2,7 +2,7 @@
 > spaceship@1.0.0 shoot
 > node scripts/shoot.mjs settings
 
-4:22:21 PM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+9:14:37 AM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
 STEP 01_start_defaults {"ui":{"open":false,"quality":"high","volume":"100","volumeText":"100%","sensitivity":"1","sensitivityText":"1.00×","status":"","statusError":false},"applied":{"quality":"high","volume":1,"sensitivity":1,"pixelRatio":1,"bloomWidth":320,"drawingBuffer":{"w":640,"h":480}},"stored":null,"locked":false,"masterGain":null}
 shot shots/settings/01_start_defaults.png
 STEP 02_menu_open {"ui":{"open":true,"quality":"high","volume":"100","volumeText":"100%","sensitivity":"1","sensitivityText":"1.00×","status":"","statusError":false},"applied":{"quality":"high","volume":1,"sensitivity":1,"pixelRatio":1,"bloomWidth":320,"drawingBuffer":{"w":640,"h":480}},"stored":null,"locked":false,"masterGain":null}
@@ -22,14 +22,9 @@ STEP 07_resize_low {"ui":{"open":true,"quality":"low","volume":"40","volumeText"
 STEP 07b_resize_medium {"ui":{"open":true,"quality":"medium","volume":"40","volumeText":"40%","sensitivity":"2.35","sensitivityText":"2.35×","status":"SETTINGS SAVED","statusError":false},"applied":{"quality":"medium","volume":0.4,"sensitivity":2.35,"pixelRatio":1,"bloomWidth":160,"drawingBuffer":{"w":640,"h":480}},"stored":"{\"quality\":\"medium\",\"volume\":0.4,\"sensitivity\":2.35}","locked":false,"masterGain":0.4000000059604645}
 STEP 07c_high {"ui":{"open":true,"quality":"high","volume":"40","volumeText":"40%","sensitivity":"2.35","sensitivityText":"2.35×","status":"SETTINGS SAVED","statusError":false},"applied":{"quality":"high","volume":0.4,"sensitivity":2.35,"pixelRatio":1,"bloomWidth":320,"drawingBuffer":{"w":640,"h":480}},"stored":"{\"quality\":\"high\",\"volume\":0.4,\"sensitivity\":2.35}","locked":false,"masterGain":0.4000000059604645}
 STEP 07d_closed {"ui":{"open":false,"quality":"low","volume":"40","volumeText":"40%","sensitivity":"2.35","sensitivityText":"2.35×","status":"SETTINGS SAVED","statusError":false},"applied":{"quality":"low","volume":0.4,"sensitivity":2.35,"pixelRatio":1,"bloomWidth":160,"drawingBuffer":{"w":640,"h":480}},"stored":"{\"quality\":\"low\",\"volume\":0.4,\"sensitivity\":2.35}","locked":false,"masterGain":0.4000000059604645}
-4:24:09 PM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+9:18:23 AM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
 STEP 08_after_reload {"ui":{"open":true,"quality":"low","volume":"40","volumeText":"40%","sensitivity":"2.35","sensitivityText":"2.35×","status":"","statusError":false},"applied":{"quality":"low","volume":0.4,"sensitivity":2.35,"pixelRatio":1,"bloomWidth":160,"drawingBuffer":{"w":640,"h":480}},"stored":"{\"quality\":\"low\",\"volume\":0.4,\"sensitivity\":2.35}","locked":false,"masterGain":null}
 shot shots/settings/08_after_reload.png
-4:24:37 PM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
+9:19:11 AM [vite] (client) [console.warn] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead.
 shot shots/settings/09_storage_failure_narrow.png
 SETTINGS CHECK PASSED {"escReleasedLock":false,"notes":["Esc key did not release pointer lock in headless Chromium; used document.exitPointerLock() (same pointerlockchange path)"]}
-
-real	3m21.098s
-user	0m2.768s
-sys	0m0.984s
-EXIT 0
